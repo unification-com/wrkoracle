@@ -167,10 +167,31 @@ E.g.
 wrkoracle record 2424
 ```
 
+The result will be output:
+
+```bash
+getting WRKChain 'wrkchain1' block 2424 and recording
+Get block for WRKChain 'wrkchain1', type 'geth' at http://127.0.0.1:7545
+Got WRKChain block
+WRKChain Height: 2424
+WRKChain Block Hash: 0x4fee5d6dd69b21b37c0923d1c1ded45ace4c94af3d1f18a423ea2e25052c25d6
+WRKChain Parent Hash: 0x8ae2443997e24ec247116efe275af3cae7bbe1a62071cf52c43cd0e233fac551
+WRKChain Hash1: 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+WRKChain Hash2: 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+WRKChain Hash3: 0x7cab995324db9a8556416274bd3367ec385bd3c8643e95052eab60a8e9537681
+Generate msg
+Broadcasting Tx and waiting for response...
+WRKChain header hash recording fee: 1000000000nund
+gas estimate: 140275
+Tx Hash: 4EAFE4B59198AB4F34A8167FA83042AA1D501A1F2B3A192B8F5496F2DE92E0A3
+Success! Recorded in Mainchain Block #2789
+Gas used: 92202
+```
+
 ## Hash mapping
 
 The `Hash1`, `Hash2` and `Hash3` values that can be submitted to Mainchain are optional, and are
-mapped to different hash values, depending on the WRKChain type:
+automatically mapped by WRKOracle to different hash values, depending on the WRKChain type:
 
 ### `geth` based chains
 

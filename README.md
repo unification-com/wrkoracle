@@ -89,7 +89,7 @@ mainchain-rest = ""
 node = ""
 output = "json"
 parent-hash = false
-trust-node = true
+trust-node = false
 wrkchain-id = ""
 wrkchain-rpc = ""
 ```

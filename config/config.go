@@ -29,7 +29,7 @@ var configDefaults = map[string]string{
 	"wrkchain-rpc":    "",
 	"mainchain-rest":  "",
 	"from":            "",
-	"trust-node":      "true",
+	"trust-node":      "false",
 	"indent":          "true",
 	"parent-hash":     "false",
 	"hash1":           "false",

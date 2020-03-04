@@ -127,6 +127,31 @@ hashes to Mainchain:
 wrkoracle run
 ```
 
+WRKOracle will output its status as follows:
+
+```bash
+starting 2020-03-04 14:43:41.580232302 +0000 GMT
+polling WRKChain for latest block
+Get block for WRKChain 'wrkchain1', type 'geth' at http://127.0.0.1:7545
+Got WRKChain block
+WRKChain Height: 61
+WRKChain Block Hash: 0x81a23fe7c73711260bebae8b027a6d0897f305407fdb13e6ed0a4effdd2d6e74
+WRKChain Parent Hash: 0xe3cdf99657d23461ee590477eb1aec1873b52824910e5369964039757defffdc
+WRKChain Hash1: 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+WRKChain Hash2: 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+WRKChain Hash3: 0xe534373922c7a6e23ba0a96bcdf53ade135ad7117b27cc9b0706c3e02360e653
+recording latest WRKChain block
+Generate msg
+Broadcasting Tx and waiting for response...
+WRKChain header hash recording fee: 1000000000nund
+gas estimate: 140275
+Tx Hash: D1F138682C7CB49A67E777CF40B9E242D5C89F754781BF6EDAE78918B3080996
+Success! Recorded in Mainchain Block #2737
+Gas used: 92202
+Done. Next poll due at 2020-03-04 14:44:41.580299426 +0000 GMT
+-----------------------------------
+```
+
 ## Submitting single block headers
 
 Individual WRKChain block headers can be submitted manually. This is useful if you wish to submit

@@ -166,7 +166,7 @@ func (mc MainchainClient) GetWrkchainType() string {
 	return mc.wrkchainMeta.Type
 }
 
-// GetWrkchainMeta retuns the WRKChain's metadata object
+// GetWrkchainMeta returns the WRKChain's metadata object
 func (mc MainchainClient) GetWrkchainMeta() types.WrkChainMeta {
 	return mc.wrkchainMeta
 }

@@ -86,7 +86,7 @@ func runConfigCmd(cmd *cobra.Command, args []string) error {
 	// get config value for a given key
 	if getAction {
 		switch key {
-		case "trace", "trust-node", "indent":
+		case "trace", "trust-node", "indent", "parent-hash", "hash1", "hash2", "hash3":
 			fmt.Println(tree.GetDefault(key, false).(bool))
 
 		default:
@@ -134,6 +134,7 @@ func runConfigCmd(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// InitConfigCmd returns a CLI command to initialise a config file with default values
 func InitConfigCmd(defaultCLIHome string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
@@ -155,7 +156,7 @@ func runInitConfigCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	// try loading configuration - bail out if it already exists
-	tree, err := loadConfigFile(cfgFile)
+	tree, _ := loadConfigFile(cfgFile)
 	if tree.Has("chain-id") {
 		return fmt.Errorf("config file already exists at %s", cfgFile)
 	}

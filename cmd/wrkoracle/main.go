@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	config2 "github.com/unification-com/wrkoracle/config"
 	"os"
 	"path"
 	"strconv"
@@ -20,12 +19,13 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/unification-com/mainchain/app"
 	undtypes "github.com/unification-com/mainchain/types"
+	"github.com/unification-com/wrkoracle/config"
 	"github.com/unification-com/wrkoracle/oracle"
 	"github.com/unification-com/wrkoracle/types"
 )
 
 var (
-	DefaultHome = os.ExpandEnv("$HOME/.und_wrkoracle")
+	defaultHome = os.ExpandEnv("$HOME/.und_wrkoracle")
 )
 
 func main() {
@@ -34,13 +34,13 @@ func main() {
 	cdc := app.MakeCodec()
 
 	// Read in the configuration file for the sdk
-	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount(undtypes.Bech32PrefixAccAddr, undtypes.Bech32PrefixAccPub)
-	config.SetBech32PrefixForValidator(undtypes.Bech32PrefixValAddr, undtypes.Bech32PrefixValPub)
-	config.SetBech32PrefixForConsensusNode(undtypes.Bech32PrefixConsAddr, undtypes.Bech32PrefixConsPub)
-	config.SetCoinType(undtypes.CoinType)
-	config.SetFullFundraiserPath(undtypes.HdWalletPath)
-	config.Seal()
+	sdkConfig := sdk.GetConfig()
+	sdkConfig.SetBech32PrefixForAccount(undtypes.Bech32PrefixAccAddr, undtypes.Bech32PrefixAccPub)
+	sdkConfig.SetBech32PrefixForValidator(undtypes.Bech32PrefixValAddr, undtypes.Bech32PrefixValPub)
+	sdkConfig.SetBech32PrefixForConsensusNode(undtypes.Bech32PrefixConsAddr, undtypes.Bech32PrefixConsPub)
+	sdkConfig.SetCoinType(undtypes.CoinType)
+	sdkConfig.SetFullFundraiserPath(undtypes.HdWalletPath)
+	sdkConfig.Seal()
 
 	rootCmd := &cobra.Command{
 		Use:   "wrkoracle",
@@ -53,8 +53,8 @@ func main() {
 	}
 
 	rootCmd.AddCommand(
-		config2.ConfigCmd(DefaultHome),
-		config2.InitConfigCmd(DefaultHome),
+		config.ConfigCmd(defaultHome),
+		config.InitConfigCmd(defaultHome),
 		version.Cmd,
 	)
 	rootCmd.AddCommand(
@@ -65,7 +65,7 @@ func main() {
 		)...,
 	)
 
-	executor := cli.PrepareMainCmd(rootCmd, "UND", DefaultHome)
+	executor := cli.PrepareMainCmd(rootCmd, "UND", defaultHome)
 	err := executor.Execute()
 	if err != nil {
 		fmt.Printf("Failed executing CLI command: %s, exiting...\n", err)
@@ -96,19 +96,19 @@ func RunCmd(cdc *codec.Codec) *cobra.Command {
 			viper.Set(flags.FlagSkipConfirmation, true)
 
 			if wrkchainId == 0 {
-				return fmt.Errorf("missing WRKChain ID: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkChainId, DefaultHome, types.FlagWrkChainId)
+				return fmt.Errorf("missing WRKChain ID: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkChainId, defaultHome, types.FlagWrkChainId)
 			}
 			if frequency == 0 {
-				return fmt.Errorf("frequency must be > 0: set %s in %s/config/config.toml or pass with --%s flag", types.FlagFrequency, DefaultHome, types.FlagFrequency)
+				return fmt.Errorf("frequency must be > 0: set %s in %s/config/config.toml or pass with --%s flag", types.FlagFrequency, defaultHome, types.FlagFrequency)
 			}
 			if len(wrkchainRpc) <= 0 {
-				return fmt.Errorf("missing WRKChain RPC URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainRpc, DefaultHome, types.FlagWrkchainRpc)
+				return fmt.Errorf("missing WRKChain RPC URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainRpc, defaultHome, types.FlagWrkchainRpc)
 			}
 			if len(mainchainRest) <= 0 {
-				return fmt.Errorf("missing Mainchain REST URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagMainchainRest, DefaultHome, types.FlagMainchainRest)
+				return fmt.Errorf("missing Mainchain REST URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagMainchainRest, defaultHome, types.FlagMainchainRest)
 			}
 			if len(from) <= 0 {
-				return fmt.Errorf("missing sender: set %s in %s/config/config.toml or pass with --%s flag", flags.FlagFrom, DefaultHome, flags.FlagFrom)
+				return fmt.Errorf("missing sender: set %s in %s/config/config.toml or pass with --%s flag", flags.FlagFrom, defaultHome, flags.FlagFrom)
 			}
 
 			kb, err := keys.NewKeyring(sdk.KeyringServiceName(), viper.GetString(flags.FlagKeyringBackend), viper.GetString(flags.FlagHome), cmd.InOrStdin())
@@ -154,16 +154,16 @@ func RecordSingleCmd(cdc *codec.Codec) *cobra.Command {
 			viper.Set(flags.FlagSkipConfirmation, true)
 
 			if wrkchainId == 0 {
-				return fmt.Errorf("missing WRKChain ID: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkChainId, DefaultHome, types.FlagWrkChainId)
+				return fmt.Errorf("missing WRKChain ID: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkChainId, defaultHome, types.FlagWrkChainId)
 			}
 			if len(wrkchainRpc) <= 0 {
-				return fmt.Errorf("missing WRKChain RPC URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainRpc, DefaultHome, types.FlagWrkchainRpc)
+				return fmt.Errorf("missing WRKChain RPC URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainRpc, defaultHome, types.FlagWrkchainRpc)
 			}
 			if len(mainchainRest) <= 0 {
-				return fmt.Errorf("missing Mainchain REST URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagMainchainRest, DefaultHome, types.FlagMainchainRest)
+				return fmt.Errorf("missing Mainchain REST URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagMainchainRest, defaultHome, types.FlagMainchainRest)
 			}
 			if len(from) <= 0 {
-				return fmt.Errorf("missing sender: set %s in %s/config/config.toml or pass with --%s flag", flags.FlagFrom, DefaultHome, flags.FlagFrom)
+				return fmt.Errorf("missing sender: set %s in %s/config/config.toml or pass with --%s flag", flags.FlagFrom, defaultHome, flags.FlagFrom)
 			}
 
 			kb, err := keys.NewKeyring(sdk.KeyringServiceName(), viper.GetString(flags.FlagKeyringBackend), viper.GetString(flags.FlagHome), cmd.InOrStdin())

@@ -8,6 +8,7 @@ import (
 	"math/big"
 )
 
+// GetBlock is used to get the block headers for a given height from a geth based WRKChain
 func GetBlock(height uint64) (types.WrkChainBlockHeader, error) {
 
 	wrkChainClient, _ := ethclient.Dial(viper.GetString(types.FlagWrkchainRpc))

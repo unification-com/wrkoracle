@@ -10,4 +10,5 @@ const (
 	FlagHash1         = "hash1"
 	FlagHash2         = "hash2"
 	FlagHash3         = "hash3"
+	FlagWrkchainType  = "wrkchain-type"
 )

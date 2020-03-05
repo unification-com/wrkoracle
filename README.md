@@ -1,6 +1,6 @@
 ![Unification](https://raw.githubusercontent.com/unification-com/wrkoracle/master/unification_logoblack.png "Unification")
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/unification-com/wrkoracle)](https://goreportcard.com/report/github.com/unification-com/wrkoracle)
+[![Go Report Card](https://goreportcard.com/badge/github.com/unification-com/wrkoracle)](https://goreportcard.com/report/github.com/unification-com/wrkoracle) [![Join the chat at https://gitter.im/unification-com/wrkoracle](https://badges.gitter.im/unification-com/wrkoracle.svg)](https://gitter.im/unification-com/wrkoracle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # WRKOracle
 

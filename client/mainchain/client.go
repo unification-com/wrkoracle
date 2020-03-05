@@ -25,7 +25,7 @@ import (
 
 // MainchainClient is an object which holds data required to communicate with Mainchain
 type MainchainClient struct {
-	wrkchainID    uint64
+	wrkchainId    uint64
 	mainchainRest string
 	wrkchainMeta  types.WrkChainMeta
 	cliCtx        context.CLIContext
@@ -37,9 +37,12 @@ type MainchainClient struct {
 // NewMainchainClient returns an initialised MainchainClient object
 func NewMainchainClient(wrkchainID uint64, cliCtx context.CLIContext, kb keys.Keybase, cdc *codec.Codec) MainchainClient {
 	mainchainRest := viper.GetString(types.FlagMainchainRest)
+	wrkchainType := viper.GetString(types.FlagWrkchainType)
 	return MainchainClient{
-		wrkchainID:    wrkchainID,
-		wrkchainMeta:  types.WrkChainMeta{},
+		wrkchainId:    wrkchainID,
+		wrkchainMeta:  types.WrkChainMeta{
+			Type: wrkchainType,
+		},
 		mainchainRest: mainchainRest,
 		cliCtx:        cliCtx,
 		kb:            kb,
@@ -54,7 +57,7 @@ func (mc MainchainClient) BroadcastToMainchain(header types.WrkChainBlockHeader)
 
 	fmt.Println("Generate msg")
 
-	msg := wrkchain.NewMsgRecordWrkChainBlock(mc.wrkchainID, header.Height, header.BlockHash, header.ParentHash, header.Hash1, header.Hash2, header.Hash3, mc.cliCtx.GetFromAddress())
+	msg := wrkchain.NewMsgRecordWrkChainBlock(mc.wrkchainId, header.Height, header.BlockHash, header.ParentHash, header.Hash1, header.Hash2, header.Hash3, mc.cliCtx.GetFromAddress())
 	err := msg.ValidateBasic()
 
 	if err != nil {
@@ -181,7 +184,7 @@ func (mc MainchainClient) GetRecordFees() string {
 func (mc *MainchainClient) SetWrkchainMetaData() error {
 
 	if len(mc.wrkchainMeta.Type) == 0 {
-		queryUrl := mc.mainchainRest + "/wrkchain/" + strconv.FormatUint(mc.wrkchainID, 10)
+		queryUrl := mc.mainchainRest + "/wrkchain/" + strconv.FormatUint(mc.wrkchainId, 10)
 
 		resp, err := http.Get(queryUrl)
 		if err != nil {

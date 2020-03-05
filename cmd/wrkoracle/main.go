@@ -86,29 +86,33 @@ func RunCmd(cdc *codec.Codec) *cobra.Command {
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			wrkchainRpc := viper.GetString(types.FlagWrkchainRpc)
-			frequency := viper.GetUint(types.FlagFrequency)
-			wrkchainId := viper.GetUint(types.FlagWrkChainId)
-			mainchainRest := viper.GetString(types.FlagMainchainRest)
+			err := config.CheckConfigFileExists()
+			if err != nil {
+				return fmt.Errorf("wrkoracle not yet initialised. Run `wrkoracle init [wrkchain_type]`")
+			}
+
 			from := viper.GetString(flags.FlagFrom)
 
-			// set --yes flag true
+			// set --yes flag true, otherwise it cannot automate broadcasting Txs
 			viper.Set(flags.FlagSkipConfirmation, true)
 
-			if wrkchainId == 0 {
+			if viper.GetUint(types.FlagWrkChainId) == 0 {
 				return fmt.Errorf("missing WRKChain ID: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkChainId, defaultHome, types.FlagWrkChainId)
 			}
-			if frequency == 0 {
+			if viper.GetUint(types.FlagFrequency) == 0 {
 				return fmt.Errorf("frequency must be > 0: set %s in %s/config/config.toml or pass with --%s flag", types.FlagFrequency, defaultHome, types.FlagFrequency)
 			}
-			if len(wrkchainRpc) <= 0 {
+			if len(viper.GetString(types.FlagWrkchainRpc)) <= 0 {
 				return fmt.Errorf("missing WRKChain RPC URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainRpc, defaultHome, types.FlagWrkchainRpc)
 			}
-			if len(mainchainRest) <= 0 {
+			if len(viper.GetString(types.FlagMainchainRest)) <= 0 {
 				return fmt.Errorf("missing Mainchain REST URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagMainchainRest, defaultHome, types.FlagMainchainRest)
 			}
 			if len(from) <= 0 {
 				return fmt.Errorf("missing sender: set %s in %s/config/config.toml or pass with --%s flag", flags.FlagFrom, defaultHome, flags.FlagFrom)
+			}
+			if len(viper.GetString(types.FlagWrkchainType)) <= 0 {
+				return fmt.Errorf("missing WRKChain Type: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainType, defaultHome, types.FlagWrkchainType)
 			}
 
 			kb, err := keys.NewKeyring(sdk.KeyringServiceName(), viper.GetString(flags.FlagKeyringBackend), viper.GetString(flags.FlagHome), cmd.InOrStdin())
@@ -123,6 +127,7 @@ func RunCmd(cdc *codec.Codec) *cobra.Command {
 			return wrkOracle.Run()
 		},
 	}
+	cmd.Flags().String(types.FlagWrkchainType, "", "WRKChain Type: geth, tendermint etc.")
 	cmd.Flags().String(types.FlagWrkchainRpc, "", "WRKChain's RPC URL")
 	cmd.Flags().Uint64(types.FlagFrequency, 0, "Frequency to submit WRKChain hashes in seconds")
 	cmd.Flags().Uint64(types.FlagWrkChainId, 0, "WRKChain ID")
@@ -145,25 +150,30 @@ func RecordSingleCmd(cdc *codec.Codec) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			wrkchainRpc := viper.GetString(types.FlagWrkchainRpc)
-			wrkchainId := viper.GetUint(types.FlagWrkChainId)
-			mainchainRest := viper.GetString(types.FlagMainchainRest)
+			err := config.CheckConfigFileExists()
+			if err != nil {
+				return fmt.Errorf("wrkoracle not yet initialised. Run `wrkoracle init [wrkchain_type]`")
+			}
+
 			from := viper.GetString(flags.FlagFrom)
 
-			// set --yes flag true
+			// set --yes flag true, otherwise it cannot automate
 			viper.Set(flags.FlagSkipConfirmation, true)
 
-			if wrkchainId == 0 {
+			if viper.GetUint(types.FlagWrkChainId) == 0 {
 				return fmt.Errorf("missing WRKChain ID: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkChainId, defaultHome, types.FlagWrkChainId)
 			}
-			if len(wrkchainRpc) <= 0 {
+			if len(viper.GetString(types.FlagWrkchainRpc)) <= 0 {
 				return fmt.Errorf("missing WRKChain RPC URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainRpc, defaultHome, types.FlagWrkchainRpc)
 			}
-			if len(mainchainRest) <= 0 {
+			if len(viper.GetString(types.FlagMainchainRest)) <= 0 {
 				return fmt.Errorf("missing Mainchain REST URL: set %s in %s/config/config.toml or pass with --%s flag", types.FlagMainchainRest, defaultHome, types.FlagMainchainRest)
 			}
 			if len(from) <= 0 {
 				return fmt.Errorf("missing sender: set %s in %s/config/config.toml or pass with --%s flag", flags.FlagFrom, defaultHome, flags.FlagFrom)
+			}
+			if len(viper.GetString(types.FlagWrkchainType)) <= 0 {
+				return fmt.Errorf("missing WRKChain Type: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainType, defaultHome, types.FlagWrkchainType)
 			}
 
 			kb, err := keys.NewKeyring(sdk.KeyringServiceName(), viper.GetString(flags.FlagKeyringBackend), viper.GetString(flags.FlagHome), cmd.InOrStdin())
@@ -184,6 +194,7 @@ func RecordSingleCmd(cdc *codec.Codec) *cobra.Command {
 			return wrkOracle.RecordSingleBlock(uint64(height))
 		},
 	}
+	cmd.Flags().String(types.FlagWrkchainType, "", "WRKChain Type: geth, tendermint etc.")
 	cmd.Flags().String(types.FlagWrkchainRpc, "", "WRKChain's RPC URL")
 	cmd.Flags().Uint64(types.FlagWrkChainId, 0, "WRKChain ID")
 	cmd.Flags().String(types.FlagMainchainRest, "", "Mainchain REST URL")

@@ -1,5 +1,6 @@
 package types
 
+// nolint
 const (
 	FlagWrkchainRpc   = "wrkchain-rpc"
 	FlagFrequency     = "frequency"

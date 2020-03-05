@@ -23,6 +23,7 @@ import (
 	"github.com/unification-com/wrkoracle/types"
 )
 
+// MainchainClient is an object which holds data required to communicate with Mainchain
 type MainchainClient struct {
 	wrkchainID    uint64
 	mainchainRest string
@@ -33,6 +34,7 @@ type MainchainClient struct {
 	recFee        string
 }
 
+// NewMainchainClient returns an initialised MainchainClient object
 func NewMainchainClient(wrkchainID uint64, cliCtx context.CLIContext, kb keys.Keybase, cdc *codec.Codec) MainchainClient {
 	mainchainRest := viper.GetString(types.FlagMainchainRest)
 	return MainchainClient{
@@ -46,6 +48,8 @@ func NewMainchainClient(wrkchainID uint64, cliCtx context.CLIContext, kb keys.Ke
 	}
 }
 
+// BroadcastToMainchain generates and broadcasts a TX containing a MsgRecordWrkChainBlock
+// message to Mainchain
 func (mc MainchainClient) BroadcastToMainchain(header types.WrkChainBlockHeader) error {
 
 	fmt.Println("Generate msg")
@@ -157,18 +161,23 @@ func (mc MainchainClient) parseTsRes(res sdk.TxResponse) error {
 	return nil
 }
 
+// GetWrkchainType returns the configured WRKChain type, e.g. geth etc.
 func (mc MainchainClient) GetWrkchainType() string {
 	return mc.wrkchainMeta.Type
 }
 
+// GetWrkchainMeta retuns the WRKChain's metadata object
 func (mc MainchainClient) GetWrkchainMeta() types.WrkChainMeta {
 	return mc.wrkchainMeta
 }
 
+// GetRecordFees returns the current required fees to submit WRKChain block header hashes to Mainchain
 func (mc MainchainClient) GetRecordFees() string {
 	return mc.recFee
 }
 
+// SetWrkchainMetaData queries Mainchain for the WRKChain metadata and stores it
+// in the MainchainClient.wrkchainMeta object
 func (mc *MainchainClient) SetWrkchainMetaData() error {
 
 	if len(mc.wrkchainMeta.Type) == 0 {
@@ -197,6 +206,9 @@ func (mc *MainchainClient) SetWrkchainMetaData() error {
 	return nil
 }
 
+// SetRecordFees queries Mainchain's wrkchain/params endpoint to update the current fees
+// required to pay for submitting WRKChain block header hashes. The result is used internally
+// by the MainchainClient.txBroadcaster function
 func (mc *MainchainClient) SetRecordFees() {
 	queryUrl := mc.mainchainRest + "/wrkchain/params"
 	resp, err := http.Get(queryUrl)

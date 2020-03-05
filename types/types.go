@@ -1,5 +1,7 @@
 package types
 
+// WrkChainBlockHeader is the standard header object that should be returned by
+// any WRKChain type client
 type WrkChainBlockHeader struct {
 	Height     uint64 `json:"height"`
 	BlockHash  string `json:"blockhash"`
@@ -9,6 +11,7 @@ type WrkChainBlockHeader struct {
 	Hash3      string `json:"hash3"`
 }
 
+// NewWrkChainBlockHeader returns a new initialised WrkChainBlockHeader
 func NewWrkChainBlockHeader(
 	height uint64,
 	blockHash string,
@@ -27,6 +30,7 @@ func NewWrkChainBlockHeader(
 	}
 }
 
+// WrkChainMeta is an object to hold WRKChain metadata when queried from Mainchain
 type WrkChainMeta struct {
 	WRKChainId string `json:"wrkchain_id"`
 	Moniker    string `json:"moniker"`
@@ -34,17 +38,22 @@ type WrkChainMeta struct {
 	Type       string `json:"type"`
 }
 
+// WrkChainMetaQueryResponse is a structure which holds Mainchain query data
+// specifically for WRKChain metadata
 type WrkChainMetaQueryResponse struct {
 	Height string       `json:"height"`
 	Result WrkChainMeta `json:"result"`
 }
 
+// FeeParams holds fee data from Mainchain params query for WRKChain fees
 type FeeParams struct {
 	Denom       string `json:"denom"`
 	FeeRecord   string `json:"fee_record"`
 	FeeRegister string `json:"fee_register"`
 }
 
+// FeeParamsQueryResponse is is a structure which holds Mainchain query data
+// specifically for WRKChain module params queries
 type FeeParamsQueryResponse struct {
 	Height string    `json:"height"`
 	Result FeeParams `json:"result"`

@@ -8,10 +8,12 @@ import (
 	"github.com/unification-com/wrkoracle/types"
 )
 
+// GetLatestBlock is a top level function to query any WRKChain type for the latest block header
 func GetLatestBlock(wrkchainMeta types.WrkChainMeta) (types.WrkChainBlockHeader, error) {
 	return GetWrkChainBlock(wrkchainMeta, 0)
 }
 
+// GetWrkChainBlock is a top level function to query any WRKChain type for the block header at a given height
 func GetWrkChainBlock(wrkchainMeta types.WrkChainMeta, height uint64) (types.WrkChainBlockHeader, error) {
 
 	fmt.Println(fmt.Sprintf("Get block for WRKChain '%s', type '%s' at %s", wrkchainMeta.Moniker, wrkchainMeta.Type, viper.GetString(types.FlagWrkchainRpc)))

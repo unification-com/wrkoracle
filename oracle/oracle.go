@@ -13,6 +13,7 @@ import (
 	"github.com/unification-com/wrkoracle/types"
 )
 
+// WrkOracle is an object to hold Oracle settings, keybase, codec, and context
 type WrkOracle struct {
 	wrkchainId  uint64
 	wrkchainRpc string
@@ -22,6 +23,7 @@ type WrkOracle struct {
 	cdc         *codec.Codec
 }
 
+// NewWrkOracle returns an initialised WrkOracle object
 func NewWrkOracle(cliCxt context.CLIContext, kb keys.Keybase, cdc *codec.Codec) WrkOracle {
 
 	wrkchainId := viper.GetUint64(types.FlagWrkChainId)
@@ -38,6 +40,7 @@ func NewWrkOracle(cliCxt context.CLIContext, kb keys.Keybase, cdc *codec.Codec) 
 	}
 }
 
+// Run runs the WRKOracle in automated mode
 func (wo WrkOracle) Run() error {
 	return wo.runOracle()
 }
@@ -56,7 +59,7 @@ func (wo WrkOracle) runOracle() error {
 
 	for {
 		go func() {
-			timeNow :=  time.Now().Local()
+			timeNow := time.Now().Local()
 			fmt.Println(fmt.Sprintf("starting %s", timeNow))
 			dueAt := time.Now().Local().Add(time.Duration(wo.frequency) * time.Second)
 			err = wo.poll(&mc)
@@ -90,6 +93,7 @@ func (wo WrkOracle) poll(mc *mainchain.MainchainClient) error {
 	return mc.BroadcastToMainchain(header)
 }
 
+// RecordSingleBlock is used to record a single WRKChain block header to Mainchain
 func (wo WrkOracle) RecordSingleBlock(height uint64) error {
 	return wo.recordBlock(height)
 }

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/version"
+	"github.com/unification-com/wrkoracle/types"
 	"io"
 	"io/ioutil"
 	"os"
@@ -33,11 +34,14 @@ var configDefaults = map[string]string{
 	"from":            "",
 	"trust-node":      "false",
 	"indent":          "true",
-	"parent-hash":     "false",
-	"hash1":           "false",
-	"hash2":           "false",
-	"hash3":           "false",
+	"parent-hash":     "true",
+	"hash1":           "",
+	"hash2":           "",
+	"hash3":           "",
+	"wrkchain-type":   "",
 }
+
+
 
 // ConfigCmd returns a CLI command to interactively create an application CLI
 // config file.
@@ -108,10 +112,11 @@ func runConfigCmd(cmd *cobra.Command, args []string) error {
 	// set config value for a given key
 	switch key {
 	case "chain-id", "output", "node", "broadcast-mode", "keyring-backend",
-		"wrkchain-id", "frequency", "wrkchain-rpc", "mainchain-rest", "from":
+		"wrkchain-id", "frequency", "wrkchain-rpc", "mainchain-rest", "from",
+		"hash1", "hash2", "hash3":
 		tree.Set(key, value)
 
-	case "trace", "trust-node", "indent", "parent-hash", "hash1", "hash2", "hash3":
+	case "trace", "trust-node", "indent", "parent-hash":
 		boolVal, err := strconv.ParseBool(value)
 		if err != nil {
 			return err
@@ -143,7 +148,7 @@ func getAll(tree *toml.Tree) error {
 
 func getConfValue(key string, tree *toml.Tree) error {
 	switch key {
-	case "trace", "trust-node", "indent", "parent-hash", "hash1", "hash2", "hash3":
+	case "trace", "trust-node", "indent", "parent-hash":
 		fmt.Println(tree.GetDefault(key, false).(bool))
 
 	default:
@@ -161,7 +166,7 @@ func getConfValue(key string, tree *toml.Tree) error {
 // InitConfigCmd returns a CLI command to initialise a config file with default values
 func InitConfigCmd(defaultCLIHome string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "init",
+		Use:   "init [type]",
 		Short: "Initialise a default config file",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Initialise WRKOracle with default config values. Config file is saved
@@ -170,11 +175,12 @@ func InitConfigCmd(defaultCLIHome string) *cobra.Command {
 If the config file already exixts, the command exits without creating defaults.
 
 Example:
-$ %s init
-`, defaultCLIHome, version.ClientName),
+$ %s init geth
+$ %s init tendermint
+`, defaultCLIHome, version.ClientName, version.ClientName),
 		),
 		RunE: runInitConfigCmd,
-		Args: cobra.NoArgs,
+		Args: cobra.ExactArgs(1),
 	}
 
 	cmd.Flags().String(flags.FlagHome, defaultCLIHome,
@@ -184,6 +190,7 @@ $ %s init
 
 func runInitConfigCmd(cmd *cobra.Command, args []string) error {
 	cfgFile, err := ensureConfFile(viper.GetString(flags.FlagHome))
+	wrkchainType := args[0]
 
 	if err != nil {
 		return err
@@ -197,7 +204,7 @@ func runInitConfigCmd(cmd *cobra.Command, args []string) error {
 
 	for k, v := range configDefaults {
 		switch k {
-		case "trace", "trust-node", "indent", "parent-hash", "hash1", "hash2", "hash3":
+		case "trace", "trust-node", "indent", "parent-hash":
 			boolVal, err := strconv.ParseBool(v)
 			if err != nil {
 				return err
@@ -210,6 +217,12 @@ func runInitConfigCmd(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	tree.Set(types.FlagWrkchainType, wrkchainType)
+	err = initChainType(wrkchainType, tree)
+	if err != nil {
+		return err
+	}
+
 	// save configuration to disk
 	if err := saveConfigFile(cfgFile, tree); err != nil {
 		return err
@@ -220,6 +233,25 @@ func runInitConfigCmd(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+func initChainType(wrkchainType string, tree *toml.Tree) error {
+
+	switch wrkchainType {
+	case "geth":
+		tree.Set("hash1", "ReceiptHash")
+		tree.Set("hash2", "TxHash")
+		tree.Set("hash3", "Root")
+	case "tendermint", "cosmos":
+		tree.Set("hash1", "data_hash")
+		tree.Set("hash2", "app_hash")
+		tree.Set("hash3", "validators_hash")
+	default:
+		return fmt.Errorf("unsupported WRKChain type: %s", wrkchainType)
+	}
+
+	return nil
+
+}
+
 func ensureConfFile(rootDir string) (string, error) {
 	cfgPath := path.Join(rootDir, "config")
 	if err := os.MkdirAll(cfgPath, os.ModePerm); err != nil {
@@ -227,6 +259,19 @@ func ensureConfFile(rootDir string) (string, error) {
 	}
 
 	return path.Join(cfgPath, "config.toml"), nil
+}
+
+func CheckConfigFileExists() error {
+	cfgFile, err := ensureConfFile(viper.GetString(flags.FlagHome))
+	if err != nil {
+		return err
+	}
+
+	if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
+		return fmt.Errorf("%s does not exist\n", cfgFile)
+	}
+
+	return nil
 }
 
 func loadConfigFile(cfgFile string) (*toml.Tree, error) {

@@ -2,11 +2,13 @@ package config
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/version"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	toml "github.com/pelletier/go-toml"
@@ -43,8 +45,22 @@ func ConfigCmd(defaultCLIHome string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config <key> [value]",
 		Short: "Create or query an application CLI configuration file",
-		RunE:  runConfigCmd,
-		Args:  cobra.RangeArgs(0, 2),
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Create or query config values for WRKOracle
+
+Output all config values:
+$ %s config
+
+Output a single value:
+$ %s config mainchain-rest --get
+
+Set a config value:
+$ %s config parent-hash true
+`,
+				version.ClientName, version.ClientName, version.ClientName),
+		),
+		RunE: runConfigCmd,
+		Args: cobra.RangeArgs(0, 2),
 	}
 
 	cmd.Flags().String(flags.FlagHome, defaultCLIHome,
@@ -73,32 +89,14 @@ func runConfigCmd(cmd *cobra.Command, args []string) error {
 
 	// print the config and exit
 	if len(args) == 0 {
-		s, err := tree.ToTomlString()
-		if err != nil {
-			return err
-		}
-		fmt.Print(s)
-		return nil
+		return getAll(tree)
 	}
 
 	key := args[0]
 
 	// get config value for a given key
 	if getAction {
-		switch key {
-		case "trace", "trust-node", "indent", "parent-hash", "hash1", "hash2", "hash3":
-			fmt.Println(tree.GetDefault(key, false).(bool))
-
-		default:
-			if defaultValue, ok := configDefaults[key]; ok {
-				fmt.Println(tree.GetDefault(key, defaultValue).(string))
-				return nil
-			}
-
-			return errUnknownConfigKey(key)
-		}
-
-		return nil
+		return getConfValue(key, tree)
 	}
 
 	if len(args) != 2 {
@@ -134,13 +132,49 @@ func runConfigCmd(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+func getAll(tree *toml.Tree) error {
+	s, err := tree.ToTomlString()
+	if err != nil {
+		return err
+	}
+	fmt.Print(s)
+	return nil
+}
+
+func getConfValue(key string, tree *toml.Tree) error {
+	switch key {
+	case "trace", "trust-node", "indent", "parent-hash", "hash1", "hash2", "hash3":
+		fmt.Println(tree.GetDefault(key, false).(bool))
+
+	default:
+		if defaultValue, ok := configDefaults[key]; ok {
+			fmt.Println(tree.GetDefault(key, defaultValue).(string))
+			return nil
+		}
+
+		return errUnknownConfigKey(key)
+	}
+
+	return nil
+}
+
 // InitConfigCmd returns a CLI command to initialise a config file with default values
 func InitConfigCmd(defaultCLIHome string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialise a default config file",
-		RunE:  runInitConfigCmd,
-		Args:  cobra.NoArgs,
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Initialise WRKOracle with default config values. Config file is saved
+ in %s/config/config.toml
+
+If the config file already exixts, the command exits without creating defaults.
+
+Example:
+$ %s init
+`, defaultCLIHome, version.ClientName),
+		),
+		RunE: runInitConfigCmd,
+		Args: cobra.NoArgs,
 	}
 
 	cmd.Flags().String(flags.FlagHome, defaultCLIHome,

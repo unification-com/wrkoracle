@@ -33,13 +33,17 @@ func GetWrkChainBlock(wrkchainMeta types.WrkChainMeta, height uint64) (types.Wrk
 		return types.WrkChainBlockHeader{}, err
 	}
 
+	hash1Ref := viper.GetString(types.FlagHash1)
+	hash2Ref := viper.GetString(types.FlagHash2)
+	hash3Ref := viper.GetString(types.FlagHash3)
+
 	fmt.Println("Got WRKChain block")
 	fmt.Println(fmt.Sprintf("WRKChain Height: %d", wrkchainBlock.Height))
 	fmt.Println(fmt.Sprintf("WRKChain Block Hash: %s", wrkchainBlock.BlockHash))
 	fmt.Println(fmt.Sprintf("WRKChain Parent Hash: %s", wrkchainBlock.ParentHash))
-	fmt.Println(fmt.Sprintf("WRKChain Hash1: %s", wrkchainBlock.Hash1))
-	fmt.Println(fmt.Sprintf("WRKChain Hash2: %s", wrkchainBlock.Hash2))
-	fmt.Println(fmt.Sprintf("WRKChain Hash3: %s", wrkchainBlock.Hash3))
+	fmt.Println(fmt.Sprintf("WRKChain Hash1 '%s': %s", hash1Ref, wrkchainBlock.Hash1))
+	fmt.Println(fmt.Sprintf("WRKChain Hash2 '%s': %s", hash2Ref, wrkchainBlock.Hash2))
+	fmt.Println(fmt.Sprintf("WRKChain Hash3 '%s': %s", hash3Ref, wrkchainBlock.Hash3))
 
 	return wrkchainBlock, err
 }

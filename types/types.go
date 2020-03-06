@@ -75,6 +75,7 @@ var (
 	}
 )
 
+// IsSupportedWrkchainType checks if the given chainType is currently supported by WRKOracle
 func IsSupportedWrkchainType(wrkchainType string) bool {
 	for _, wct := range SupportedWrkchainTypes {
 		if wrkchainType == wct {
@@ -84,6 +85,7 @@ func IsSupportedWrkchainType(wrkchainType string) bool {
 	return false
 }
 
+// IsSupportedHash checks if the given hashType for the given chainType is currently supported by WRKOracle
 func IsSupportedHash(wrkchainType string, hashType string) bool {
 	if !IsSupportedWrkchainType(wrkchainType) {
 		return false

@@ -293,6 +293,7 @@ func ensureConfFile(rootDir string) (string, error) {
 	return path.Join(cfgPath, "config.toml"), nil
 }
 
+// CheckConfigFileExists checks if the config.toml file exists
 func CheckConfigFileExists() error {
 	cfgFile, err := ensureConfFile(viper.GetString(flags.FlagHome))
 	if err != nil {

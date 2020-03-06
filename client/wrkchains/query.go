@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/unification-com/wrkoracle/client/wrkchains/geth"
+	tm "github.com/unification-com/wrkoracle/client/wrkchains/tendermint"
 	"github.com/unification-com/wrkoracle/types"
 )
 
@@ -25,6 +26,8 @@ func GetWrkChainBlock(wrkchainMeta types.WrkChainMeta, height uint64) (types.Wrk
 	switch wrkchainMeta.Type {
 	case "geth":
 		wrkchainBlock, err = geth.GetBlock(height)
+	case "tendermint", "cosmos":
+		wrkchainBlock, err = tm.GetBlock(height)
 	default:
 		return types.WrkChainBlockHeader{}, fmt.Errorf("unsupported wrkchain type %s", wrkchainMeta.Type)
 	}

@@ -108,6 +108,22 @@ func runConfigCmd(cmd *cobra.Command, args []string) error {
 	value := args[1]
 
 	// set config value for a given key
+	err = setConfValue(tree, key, value)
+
+	if err != nil {
+		return err
+	}
+
+	// save configuration to disk
+	if err := saveConfigFile(cfgFile, tree); err != nil {
+		return err
+	}
+
+	fmt.Fprintf(os.Stderr, "configuration saved to %s\n", cfgFile)
+	return nil
+}
+
+func setConfValue(tree *toml.Tree, key, value string) error {
 	switch key {
 	case "chain-id", "output", "node", "broadcast-mode", "keyring-backend",
 		"wrkchain-id", "frequency", "wrkchain-rpc", "mainchain-rest", "from":
@@ -143,13 +159,6 @@ func runConfigCmd(cmd *cobra.Command, args []string) error {
 	default:
 		return errUnknownConfigKey(key)
 	}
-
-	// save configuration to disk
-	if err := saveConfigFile(cfgFile, tree); err != nil {
-		return err
-	}
-
-	fmt.Fprintf(os.Stderr, "configuration saved to %s\n", cfgFile)
 	return nil
 }
 

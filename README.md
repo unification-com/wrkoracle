@@ -66,10 +66,16 @@ wrkoracle keys add my_wrkoracle_acc --recover
 In either case, the account will need sufficient UND to run the Oracle and submit hashes to
 Mainchain.
 
-WRKOracle can then be initialised with default values by running:
+WRKOracle must then be initialised with default values by running:
 
 ```bash
-wrkoracle init
+wrkoracle init [wrkchain_type]
+```
+
+E.g.
+
+```bash
+wrkoracle init geth
 ```
 
 This will create a skeleton configuration file in `$HOME/.und_wrkoracle/config/config.toml` as
@@ -80,18 +86,19 @@ broadcast-mode = "block"
 chain-id = ""
 frequency = "60"
 from = ""
-hash1 = false
-hash2 = false
-hash3 = false
+hash1 = "ReceiptHash"
+hash2 = "TxHash"
+hash3 = "Root"
 indent = true
 keyring-backend = "os"
 mainchain-rest = ""
 node = ""
 output = "json"
-parent-hash = false
+parent-hash = true
 trust-node = false
 wrkchain-id = ""
 wrkchain-rpc = ""
+wrkchain-type = "geth"
 ```
 
 ## Configuration options
@@ -107,8 +114,8 @@ a Mainchain block. **Required**
 block header and submit the hashes to Mainchain. **Required**
 - `from`: default account that should be used by WRKOracle to sign the transactions, as named when
 importing the account above, e.g. `my_wrkoracle_acc`. **Required**
-- `hash1`, `hash2`, `hash3`: boolean values whether or not to submit any of the three optional
-hashes to Mainchain. See section **Hash mapping** below. **Required**
+- `hash1`, `hash2`, `hash3`: optional values mapped to various header hashes, depending on the WRKChain type
+hashes to Mainchain. See section **Hash mapping** below. If left empty, no value will be submitted.
 - `parent-hash`: whether or not to optionally submit the WRKChain block header parent hash. **Required**
 - `mainchain-rest`: The REST server for Mainchain, e.g. https://rest-testnet.unification.io. **Required**
 - `node`: Mainchain node to broadcast Txs to, e.g. `tcp://localhost:26656` if you are running you
@@ -191,10 +198,30 @@ Gas used: 92202
 ## Hash mapping
 
 The `Hash1`, `Hash2` and `Hash3` values that can be submitted to Mainchain are optional, and are
-automatically mapped by WRKOracle to different hash values, depending on the WRKChain type:
+initially mapped by WRKOracle during initialisation to some default values, depending on 
+the WRKChain type.
+
+The mapping can be configured in `$HOME/.und_wrkoracle/config/config.toml` by setting the
+corresponding entires for `hash1`, `hash2` and `hash3`. The defaults for each chain type are
+listed below:
 
 ### `geth` based chains
 
-`Hash1`: Merkle root hash for the Receipts: `Header.ReceiptHash`  
-`Hash2`: Merkle root hash for the Tx: `Header.TxHash`  
-`Hash3`: Merkle root hash for Root: `Header.Root`  
+`hash1` = `ReceiptHash` - Merkle root hash for the Receipts (`Header.ReceiptHash`)  
+`hash2` = `TxHash` - Merkle root hash for the Tx (`Header.TxHash`)  
+`hash3` = `Root` - Merkle root hash for Root (`Header.Root`)  
+
+### `tendermint` / `cosmos` based chains
+
+block_id.hash - block hash  
+block.header.last_block_id.hash - parent hash  
+
+block.header.data_hash - Hash1 - MerkleRoot of transaction hashes  
+block.headr.app_hash - Hash2 - state after txs from the previous block  
+block.header.validators_hash - Hash3 - validators for the current block  
+
+unmapped
+block.header.last_results_hash - root hash of all results from the txs from the previous block  
+block.header.last_commit_hash - commit from validators from the last block  
+block.header.consensus_hash - consensus params for current block  
+block.header.next_validators_hash - validators for the next block   

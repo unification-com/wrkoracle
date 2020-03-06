@@ -77,8 +77,8 @@ var (
 
 func IsSupportedWrkchainType(wrkchainType string) bool {
 	for _, wct := range SupportedWrkchainTypes {
-        if wrkchainType == wct {
-        	return true
+		if wrkchainType == wct {
+			return true
 		}
 	}
 	return false

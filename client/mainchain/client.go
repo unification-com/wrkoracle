@@ -40,8 +40,8 @@ func NewMainchainClient(wrkchainID uint64, cliCtx context.CLIContext, kb keys.Ke
 	wrkchainType := viper.GetString(types.FlagWrkchainType)
 
 	return MainchainClient{
-		wrkchainId:    wrkchainID,
-		wrkchainMeta:  types.WrkChainMeta{
+		wrkchainId: wrkchainID,
+		wrkchainMeta: types.WrkChainMeta{
 			Type: wrkchainType,
 		},
 		mainchainRest: mainchainRest,
@@ -215,7 +215,7 @@ func (mc *MainchainClient) SetWrkchainMetaData() error {
 		}
 
 		if uint64(onChainId) != mc.wrkchainId {
-			return fmt.Errorf("WRKChain ID mismatch: configured = %s, Mainchain = %s", mc.wrkchainId, onChainId)
+			return fmt.Errorf("WRKChain ID mismatch: configured = %d, Mainchain = %d", mc.wrkchainId, onChainId)
 		}
 
 		mc.wrkchainMeta = wc.Result

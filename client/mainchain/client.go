@@ -38,6 +38,7 @@ type MainchainClient struct {
 func NewMainchainClient(wrkchainID uint64, cliCtx context.CLIContext, kb keys.Keybase, cdc *codec.Codec) MainchainClient {
 	mainchainRest := viper.GetString(types.FlagMainchainRest)
 	wrkchainType := viper.GetString(types.FlagWrkchainType)
+
 	return MainchainClient{
 		wrkchainId:    wrkchainID,
 		wrkchainMeta:  types.WrkChainMeta{
@@ -183,7 +184,8 @@ func (mc MainchainClient) GetRecordFees() string {
 // in the MainchainClient.wrkchainMeta object
 func (mc *MainchainClient) SetWrkchainMetaData() error {
 
-	if len(mc.wrkchainMeta.Type) == 0 {
+	if len(mc.wrkchainMeta.Moniker) == 0 {
+		fmt.Println("Check WRKChain metadata")
 		queryUrl := mc.mainchainRest + "/wrkchain/" + strconv.FormatUint(mc.wrkchainId, 10)
 
 		resp, err := http.Get(queryUrl)
@@ -200,6 +202,20 @@ func (mc *MainchainClient) SetWrkchainMetaData() error {
 		err = json.Unmarshal(body, &wc)
 		if err != nil {
 			return err
+		}
+
+		wrkchainType := wc.Result.Type
+
+		if wrkchainType != mc.wrkchainMeta.Type {
+			return fmt.Errorf("WRKChain Type mismatch: configured = %s, Mainchain = %s", mc.wrkchainMeta.Type, wrkchainType)
+		}
+		onChainId, err := strconv.Atoi(wc.Result.WRKChainId)
+		if err != nil {
+			return err
+		}
+
+		if uint64(onChainId) != mc.wrkchainId {
+			return fmt.Errorf("WRKChain ID mismatch: configured = %s, Mainchain = %s", mc.wrkchainId, onChainId)
 		}
 
 		mc.wrkchainMeta = wc.Result

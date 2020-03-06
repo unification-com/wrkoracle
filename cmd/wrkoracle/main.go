@@ -92,6 +92,7 @@ func RunCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			from := viper.GetString(flags.FlagFrom)
+			wrkchainType := viper.GetString(types.FlagWrkchainType)
 
 			// set --yes flag true, otherwise it cannot automate broadcasting Txs
 			viper.Set(flags.FlagSkipConfirmation, true)
@@ -111,8 +112,13 @@ func RunCmd(cdc *codec.Codec) *cobra.Command {
 			if len(from) <= 0 {
 				return fmt.Errorf("missing sender: set %s in %s/config/config.toml or pass with --%s flag", flags.FlagFrom, defaultHome, flags.FlagFrom)
 			}
-			if len(viper.GetString(types.FlagWrkchainType)) <= 0 {
+			if len(wrkchainType) <= 0 {
 				return fmt.Errorf("missing WRKChain Type: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainType, defaultHome, types.FlagWrkchainType)
+			}
+
+			if !types.IsSupportedWrkchainType(wrkchainType) {
+				supportedTypes := strings.Join(types.SupportedWrkchainTypes, ", ")
+				return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", wrkchainType, supportedTypes)
 			}
 
 			kb, err := keys.NewKeyring(sdk.KeyringServiceName(), viper.GetString(flags.FlagKeyringBackend), viper.GetString(flags.FlagHome), cmd.InOrStdin())
@@ -156,6 +162,7 @@ func RecordSingleCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			from := viper.GetString(flags.FlagFrom)
+			wrkchainType := viper.GetString(types.FlagWrkchainType)
 
 			// set --yes flag true, otherwise it cannot automate
 			viper.Set(flags.FlagSkipConfirmation, true)
@@ -172,8 +179,13 @@ func RecordSingleCmd(cdc *codec.Codec) *cobra.Command {
 			if len(from) <= 0 {
 				return fmt.Errorf("missing sender: set %s in %s/config/config.toml or pass with --%s flag", flags.FlagFrom, defaultHome, flags.FlagFrom)
 			}
-			if len(viper.GetString(types.FlagWrkchainType)) <= 0 {
+			if len(wrkchainType) <= 0 {
 				return fmt.Errorf("missing WRKChain Type: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainType, defaultHome, types.FlagWrkchainType)
+			}
+
+			if !types.IsSupportedWrkchainType(wrkchainType) {
+				supportedTypes := strings.Join(types.SupportedWrkchainTypes, ", ")
+				return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", wrkchainType, supportedTypes)
 			}
 
 			kb, err := keys.NewKeyring(sdk.KeyringServiceName(), viper.GetString(flags.FlagKeyringBackend), viper.GetString(flags.FlagHome), cmd.InOrStdin())

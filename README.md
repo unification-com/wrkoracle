@@ -122,7 +122,8 @@ hashes to Mainchain. See section **Hash mapping** below. If left empty, no value
 own local full Mainchain node. **Required**
 - `trust-node`: Trust connected full node (don't verify proofs for responses). **Required**
 - `wrkchain-id`: The integer ID of your WRKChain, as given when the WRKChain was registered on Mainchain. **Required**
-- `wrkchain-rpc`: The RPC node where WRKOracle can query your WRKChain, e.g. http://127.0.0.1:7545. **Required**
+- `wrkchain-rpc`: The RPC node where WRKOracle can query your WRKChain, e.g. `http://127.0.0.1:7545`, 
+`tcp://172.25.0.3:26661` etc.. **Required**
 
 ## Running in automated mode
 
@@ -197,31 +198,45 @@ Gas used: 92202
 
 ## Hash mapping
 
-The `Hash1`, `Hash2` and `Hash3` values that can be submitted to Mainchain are optional, and are
+The `Hash1`, `Hash2` and `Hash3` are optional values that can be submitted to Mainchain, and are
 initially mapped by WRKOracle during initialisation to some default values, depending on 
 the WRKChain type.
 
 The mapping can be configured in `$HOME/.und_wrkoracle/config/config.toml` by setting the
-corresponding entires for `hash1`, `hash2` and `hash3`. The defaults for each chain type are
-listed below:
+corresponding entries for `hash1`, `hash2` and `hash3`. Leaving the entries empty will result
+in the hashes being omitted from the WRKChain hash submission. The initialised defaults for 
+each chain type are listed below.
 
 ### `geth` based chains
 
-`hash1` = `ReceiptHash` - Merkle root hash for the Receipts (`Header.ReceiptHash`)  
-`hash2` = `TxHash` - Merkle root hash for the Tx (`Header.TxHash`)  
-`hash3` = `Root` - Merkle root hash for Root (`Header.Root`)  
+For `geth` based WRKChains, WRKOracle supports the following three optional hashes 
+to be submitted:
+
+1. `Header.ReceiptHash` - Merkle root hash for the Receipts
+2. `Header.TxHash` - Merkle root hash for the Tx
+3. `Header.Root` - Merkle root hash for Root
+
+By default during initialisation, WRKOracle maps them as followed:
+
+`hash1` = `ReceiptHash`  
+`hash2` = `TxHash`  
+`hash3` = `Root`
 
 ### `tendermint` / `cosmos` based chains
 
-block_id.hash - block hash  
-block.header.last_block_id.hash - parent hash  
+For `tendermint` and `cosmos` based WRKChains, WRKOracle supports the following 7 optional
+hashes:
 
-block.header.data_hash - Hash1 - MerkleRoot of transaction hashes  
-block.headr.app_hash - Hash2 - state after txs from the previous block  
-block.header.validators_hash - Hash3 - validators for the current block  
+1. `Block.Header.DataHash` - MerkleRoot of transaction hashes in this block
+2. `Block.Header.AppHash` - state after txs from the previous block
+3. `Block.Header.ValidatorsHash` - validators for the current block
+4. `Block.Header.LastResultsHash` - root hash of all results from the txs from the previous block
+5. `Block.Header.LastCommitHash` - commit from validators from the last block
+6. `Block.Header.ConsensusHash` - consensus params for current block
+7. `Block.Header.NextValidatorsHash` - validators for the next block
 
-unmapped
-block.header.last_results_hash - root hash of all results from the txs from the previous block  
-block.header.last_commit_hash - commit from validators from the last block  
-block.header.consensus_hash - consensus params for current block  
-block.header.next_validators_hash - validators for the next block   
+By default during initialisation, WRKOracle maps the following hashes:
+
+`hash1` = `DataHash`  
+`hash2` = `AppHash`  
+`hash3` = `ValidatorsHash`

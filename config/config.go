@@ -41,8 +41,6 @@ var configDefaults = map[string]string{
 	"wrkchain-type":   "",
 }
 
-
-
 // ConfigCmd returns a CLI command to interactively create an application CLI
 // config file.
 func ConfigCmd(defaultCLIHome string) *cobra.Command {
@@ -110,10 +108,44 @@ func runConfigCmd(cmd *cobra.Command, args []string) error {
 	value := args[1]
 
 	// set config value for a given key
+	err = setConfValue(tree, key, value)
+
+	if err != nil {
+		return err
+	}
+
+	// save configuration to disk
+	if err := saveConfigFile(cfgFile, tree); err != nil {
+		return err
+	}
+
+	fmt.Fprintf(os.Stderr, "configuration saved to %s\n", cfgFile)
+	return nil
+}
+
+func setConfValue(tree *toml.Tree, key, value string) error {
 	switch key {
 	case "chain-id", "output", "node", "broadcast-mode", "keyring-backend",
-		"wrkchain-id", "frequency", "wrkchain-rpc", "mainchain-rest", "from",
-		"hash1", "hash2", "hash3":
+		"wrkchain-id", "frequency", "wrkchain-rpc", "mainchain-rest", "from":
+		tree.Set(key, value)
+
+	case "wrkchain-type":
+		if !types.IsSupportedWrkchainType(value) {
+			supportedTypes := strings.Join(types.SupportedWrkchainTypes, ", ")
+			return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", value, supportedTypes)
+		}
+		tree.Set(key, value)
+
+	case "hash1", "hash2", "hash3":
+		currentType := tree.Get("wrkchain-type").(string)
+		if !types.IsSupportedWrkchainType(currentType) {
+			supportedTypes := strings.Join(types.SupportedWrkchainTypes, ", ")
+			return fmt.Errorf("unsupported WRKChain type detected in config: %s. supported types: %s", currentType, supportedTypes)
+		}
+		if !types.IsSupportedHash(currentType, value) {
+			supportedHashes := strings.Join(types.SupportedHashMaps[currentType], ", ")
+			return fmt.Errorf("unsupported hash map '%s' for wrkchain type %s. supported types: %s", value, currentType, supportedHashes)
+		}
 		tree.Set(key, value)
 
 	case "trace", "trust-node", "indent", "parent-hash":
@@ -127,13 +159,6 @@ func runConfigCmd(cmd *cobra.Command, args []string) error {
 	default:
 		return errUnknownConfigKey(key)
 	}
-
-	// save configuration to disk
-	if err := saveConfigFile(cfgFile, tree); err != nil {
-		return err
-	}
-
-	fmt.Fprintf(os.Stderr, "configuration saved to %s\n", cfgFile)
 	return nil
 }
 
@@ -189,8 +214,15 @@ $ %s init tendermint
 }
 
 func runInitConfigCmd(cmd *cobra.Command, args []string) error {
-	cfgFile, err := ensureConfFile(viper.GetString(flags.FlagHome))
+
 	wrkchainType := args[0]
+
+	if !types.IsSupportedWrkchainType(wrkchainType) {
+		supportedTypes := strings.Join(types.SupportedWrkchainTypes, ", ")
+		return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", wrkchainType, supportedTypes)
+	}
+
+	cfgFile, err := ensureConfFile(viper.GetString(flags.FlagHome))
 
 	if err != nil {
 		return err
@@ -241,9 +273,9 @@ func initChainType(wrkchainType string, tree *toml.Tree) error {
 		tree.Set("hash2", "TxHash")
 		tree.Set("hash3", "Root")
 	case "tendermint", "cosmos":
-		tree.Set("hash1", "data_hash")
-		tree.Set("hash2", "app_hash")
-		tree.Set("hash3", "validators_hash")
+		tree.Set("hash1", "DataHash")
+		tree.Set("hash2", "AppHash")
+		tree.Set("hash3", "ValidatorsHash")
 	default:
 		return fmt.Errorf("unsupported WRKChain type: %s", wrkchainType)
 	}

@@ -58,3 +58,41 @@ type FeeParamsQueryResponse struct {
 	Height string    `json:"height"`
 	Result FeeParams `json:"result"`
 }
+
+// SupportedWrkchainTypes holds a list fo currently supported WRKChain types
+var (
+	SupportedWrkchainTypes = []string{
+		"geth",
+		"cosmos",
+		"tendermint",
+	}
+
+	// SupportedHashMaps holds a list of supported optional hashes that can be submitted for a WRKChain
+	SupportedHashMaps = map[string][]string{
+		"geth":       {"ReceiptHash", "TxHash", "Root"},
+		"cosmos":     {"DataHash", "AppHash", "ValidatorsHash", "LastResultsHash", "LastCommitHash", "ConsensusHash", "NextValidatorsHash"},
+		"tendermint": {"DataHash", "AppHash", "ValidatorsHash", "LastResultsHash", "LastCommitHash", "ConsensusHash", "NextValidatorsHash"},
+	}
+)
+
+func IsSupportedWrkchainType(wrkchainType string) bool {
+	for _, wct := range SupportedWrkchainTypes {
+		if wrkchainType == wct {
+			return true
+		}
+	}
+	return false
+}
+
+func IsSupportedHash(wrkchainType string, hashType string) bool {
+	if !IsSupportedWrkchainType(wrkchainType) {
+		return false
+	}
+	supportedHashes := SupportedHashMaps[wrkchainType]
+	for _, h := range supportedHashes {
+		if hashType == h {
+			return true
+		}
+	}
+	return false
+}

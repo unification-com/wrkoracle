@@ -346,6 +346,8 @@ github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGr
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
 github.com/unification-com/mainchain v1.3.2-0.20200227142642-a61c54c06b03 h1:LBO7zfkFefJaWiKlt8BbSRZASX5Em1b6O4Srt5X//xY=
 github.com/unification-com/mainchain v1.3.2-0.20200227142642-a61c54c06b03/go.mod h1:Xn0nHsnpFZIh0jSX6ZR43Kv4R/x6ULC0LjPY0fPTO6E=
+github.com/unification-com/mainchain v1.3.3 h1:ijdf46Iw75Zza1/gy9tk+N3AnzGmmK6nJp/Ixy0DTaA=
+github.com/unification-com/mainchain v1.3.3/go.mod h1:Xn0nHsnpFZIh0jSX6ZR43Kv4R/x6ULC0LjPY0fPTO6E=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/wsddn/go-ecdh v0.0.0-20161211032359-48726bab9208/go.mod h1:IotVbo4F+mw0EzQ08zFqg7pK3FebNXpaMsRy2RT+Ees=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=

@@ -1,6 +1,5 @@
 package wrkchains
 
-
 // WrkChainBlockHeader is the standard header object that should be returned by
 // any WRKChain type client
 type WrkChainBlockHeader struct {

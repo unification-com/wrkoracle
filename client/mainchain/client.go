@@ -1,17 +1,15 @@
 package mainchain
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/tendermint/tendermint/libs/log"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/input"
 	clikeys "github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys"
@@ -32,15 +30,17 @@ type MainchainClient struct {
 	kb            keys.Keybase
 	cdc           *codec.Codec
 	recFee        string
+	log           log.Logger
 }
 
 // NewMainchainClient returns an initialised MainchainClient object
-func NewMainchainClient(wrkchainID uint64, cliCtx context.CLIContext, kb keys.Keybase, cdc *codec.Codec) MainchainClient {
+func NewMainchainClient(cliCtx context.CLIContext, kb keys.Keybase, cdc *codec.Codec, log log.Logger) *MainchainClient {
 	mainchainRest := viper.GetString(types.FlagMainchainRest)
 	wrkchainType := viper.GetString(types.FlagWrkchainType)
+	wrkChainId := viper.GetUint64(types.FlagWrkChainId)
 
-	return MainchainClient{
-		wrkchainId: wrkchainID,
+	return &MainchainClient{
+		wrkchainId: wrkChainId,
 		wrkchainMeta: types.WrkChainMeta{
 			Type: wrkchainType,
 		},
@@ -49,6 +49,7 @@ func NewMainchainClient(wrkchainID uint64, cliCtx context.CLIContext, kb keys.Ke
 		kb:            kb,
 		cdc:           cdc,
 		recFee:        "1000000000nund",
+		log:           log.With("pkg", "mainchain"),
 	}
 }
 
@@ -56,7 +57,7 @@ func NewMainchainClient(wrkchainID uint64, cliCtx context.CLIContext, kb keys.Ke
 // message to Mainchain
 func (mc MainchainClient) BroadcastToMainchain(header types.WrkChainBlockHeader) error {
 
-	fmt.Println("Generate msg")
+	mc.log.Info("Generate msg")
 
 	msg := wrkchain.NewMsgRecordWrkChainBlock(mc.wrkchainId, header.Height, header.BlockHash, header.ParentHash, header.Hash1, header.Hash2, header.Hash3, mc.cliCtx.GetFromAddress())
 	err := msg.ValidateBasic()
@@ -65,7 +66,7 @@ func (mc MainchainClient) BroadcastToMainchain(header types.WrkChainBlockHeader)
 		return err
 	}
 
-	fmt.Println("Broadcasting Tx and waiting for response...")
+	mc.log.Info("Broadcasting Tx and waiting for response...")
 
 	res, err := mc.txBroadcaster(mc.cliCtx, []sdk.Msg{msg})
 
@@ -78,7 +79,7 @@ func (mc MainchainClient) BroadcastToMainchain(header types.WrkChainBlockHeader)
 
 func (mc MainchainClient) txBroadcaster(cliCtx context.CLIContext, msgs []sdk.Msg) (sdk.TxResponse, error) {
 
-	fmt.Println(fmt.Sprintf("WRKChain header hash recording fee: %s", mc.recFee))
+	mc.log.Info("WRKChain header hash recording fee", "fee", mc.recFee)
 	feeCoin, err := sdk.ParseCoin(mc.recFee)
 
 	if err != nil {
@@ -103,37 +104,11 @@ func (mc MainchainClient) txBroadcaster(cliCtx context.CLIContext, msgs []sdk.Ms
 		}
 
 		gasEst := utils.GasEstimateResponse{GasEstimate: txBldr.Gas()}
-		_, _ = fmt.Fprintf(os.Stderr, "%s\n", gasEst.String())
+		mc.log.Info(gasEst.String())
 	}
 
 	if cliCtx.Simulate {
 		return sdk.TxResponse{}, nil
-	}
-
-	if !cliCtx.SkipConfirm {
-		stdSignMsg, err := txBldr.BuildSignMsg(msgs)
-		if err != nil {
-			return sdk.TxResponse{}, err
-		}
-
-		var jsonBz []byte
-		if viper.GetBool(flags.FlagIndentResponse) {
-			jsonBz, err = cliCtx.Codec.MarshalJSONIndent(stdSignMsg, "", "  ")
-			if err != nil {
-				panic(err)
-			}
-		} else {
-			jsonBz = cliCtx.Codec.MustMarshalJSON(stdSignMsg)
-		}
-
-		_, _ = fmt.Fprintf(os.Stderr, "%s\n\n", jsonBz)
-
-		buf := bufio.NewReader(os.Stdin)
-		ok, err := input.GetConfirmation("confirm transaction before signing and broadcasting", buf)
-		if err != nil || !ok {
-			_, _ = fmt.Fprintf(os.Stderr, "%s\n", "cancelled transaction")
-			return sdk.TxResponse{}, err
-		}
 	}
 
 	// build and sign the transaction
@@ -153,14 +128,14 @@ func (mc MainchainClient) txBroadcaster(cliCtx context.CLIContext, msgs []sdk.Ms
 
 func (mc MainchainClient) parseTsRes(res sdk.TxResponse) error {
 
-	fmt.Println(fmt.Sprintf("Tx Hash: %s", res.TxHash))
+	mc.log.Info("Tx broadcast", "hash", res.TxHash)
 
 	if len(res.Codespace) > 0 && res.Code > 0 {
 		return fmt.Errorf("TX ERROR! Codespace: %s, Code: %d, Message: %s", res.Codespace, res.Code, res.RawLog)
 	}
 
-	fmt.Println(fmt.Sprintf("Success! Recorded in Mainchain Block #%d", res.Height))
-	fmt.Println(fmt.Sprintf("Gas used: %d", res.GasUsed))
+	mc.log.Info("Success! Recorded in Mainchain Block", "height", res.Height)
+	mc.log.Info("Gas used:", "gas", res.GasUsed)
 
 	return nil
 }
@@ -185,7 +160,7 @@ func (mc MainchainClient) GetRecordFees() string {
 func (mc *MainchainClient) SetWrkchainMetaData() error {
 
 	if len(mc.wrkchainMeta.Moniker) == 0 {
-		fmt.Println("Check WRKChain metadata")
+		mc.log.Info("Check WRKChain metadata")
 		queryUrl := mc.mainchainRest + "/wrkchain/" + strconv.FormatUint(mc.wrkchainId, 10)
 
 		resp, err := http.Get(queryUrl)
@@ -202,6 +177,10 @@ func (mc *MainchainClient) SetWrkchainMetaData() error {
 		err = json.Unmarshal(body, &wc)
 		if err != nil {
 			return err
+		}
+
+		if wc.Result.WRKChainId == "0" {
+			return fmt.Errorf("WRKChain ID %d does not exist on Mainchain", mc.wrkchainId)
 		}
 
 		wrkchainType := wc.Result.Type
@@ -244,7 +223,7 @@ func (mc *MainchainClient) SetRecordFees() {
 	err = json.Unmarshal(body, &fees)
 	if err == nil {
 		fee := fees.Result.FeeRecord + fees.Result.Denom
-		if fee != mc.recFee {
+		if fee != mc.recFee && len(fees.Result.FeeRecord) > 0 && len(fees.Result.Denom) > 0 {
 			fmt.Println(fmt.Sprintf("Fees for recording updated: %s", fee))
 			mc.recFee = fee
 		}

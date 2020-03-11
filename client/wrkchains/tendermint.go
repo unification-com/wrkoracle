@@ -1,7 +1,8 @@
-package tendermint
+package wrkchains
 
 import (
 	"fmt"
+	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/spf13/viper"
 	tmclient "github.com/tendermint/tendermint/rpc/client"
@@ -9,8 +10,18 @@ import (
 	"github.com/unification-com/wrkoracle/types"
 )
 
-// GetBlock is used to get the block headers for a given height from a tendermint based WRKChain
-func GetBlock(height uint64) (types.WrkChainBlockHeader, error) {
+type Tendermint struct {
+	log log.Logger
+}
+
+func NewTendermintClient(log log.Logger) *Tendermint {
+	return &Tendermint{
+		log: log.With("pkg", "wrkchains").With("clnt", "tendermint"),
+	}
+}
+
+// GetBlockAtHeight is used to get the block headers for a given height from a tendermint based WRKChain
+func (t Tendermint) GetBlockAtHeight(height uint64) (types.WrkChainBlockHeader, error) {
 	heightAt := int64(height)
 	wrkChainClient, err := tmclient.NewHTTP(viper.GetString(types.FlagWrkchainRpc), "/websocket")
 
@@ -49,15 +60,15 @@ func GetBlock(height uint64) (types.WrkChainBlockHeader, error) {
 	hash3Ref := viper.GetString(types.FlagHash3)
 
 	if len(hash1Ref) > 0 {
-		hash1 = getHash(latestWrkchainBlock.Block.Header, hash1Ref)
+		hash1 = t.getHash(latestWrkchainBlock.Block.Header, hash1Ref)
 	}
 
 	if len(hash2Ref) > 0 {
-		hash2 = getHash(latestWrkchainBlock.Block.Header, hash2Ref)
+		hash2 = t.getHash(latestWrkchainBlock.Block.Header, hash2Ref)
 	}
 
 	if len(hash3Ref) > 0 {
-		hash3 = getHash(latestWrkchainBlock.Block.Header, hash3Ref)
+		hash3 = t.getHash(latestWrkchainBlock.Block.Header, hash3Ref)
 	}
 
 	wrkchainBlock := types.NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
@@ -65,7 +76,7 @@ func GetBlock(height uint64) (types.WrkChainBlockHeader, error) {
 	return wrkchainBlock, nil
 }
 
-func getHash(header tmtypes.Header, ref string) string {
+func (t Tendermint) getHash(header tmtypes.Header, ref string) string {
 	switch ref {
 	case "DataHash":
 		return header.DataHash.String()
@@ -82,7 +93,7 @@ func getHash(header tmtypes.Header, ref string) string {
 	case "NextValidatorsHash":
 		return header.NextValidatorsHash.String()
 	default:
-		fmt.Println(fmt.Sprintf("unknown hash type '%s'", ref))
+		t.log.Error(fmt.Sprintf("unknown hash type '%s'", ref))
 		return ""
 	}
 }

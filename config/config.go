@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/version"
-	"github.com/unification-com/wrkoracle/types"
 	"io"
 	"io/ioutil"
 	"os"
@@ -12,9 +10,11 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/version"
 	toml "github.com/pelletier/go-toml"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/unification-com/wrkoracle/types"
 )
 
 const (

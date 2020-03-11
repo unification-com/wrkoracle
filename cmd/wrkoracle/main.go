@@ -129,7 +129,10 @@ func RunCmd(cdc *codec.Codec) *cobra.Command {
 
 			cliCtx := context.NewCLIContextWithInputAndFrom(cmd.InOrStdin(), from).WithCodec(cdc)
 
-			wrkOracle := oracle.NewWrkOracle(cliCtx, kb, cdc)
+			wrkOracle, err := oracle.NewWrkOracle(cliCtx, kb, cdc)
+			if err != nil {
+				return err
+			}
 			return wrkOracle.Run()
 		},
 	}
@@ -202,7 +205,10 @@ func RecordSingleCmd(cdc *codec.Codec) *cobra.Command {
 
 			cliCtx := context.NewCLIContextWithInputAndFrom(cmd.InOrStdin(), from).WithCodec(cdc)
 
-			wrkOracle := oracle.NewWrkOracle(cliCtx, kb, cdc)
+			wrkOracle, err := oracle.NewWrkOracle(cliCtx, kb, cdc)
+			if err != nil {
+				return err
+			}
 			return wrkOracle.RecordSingleBlock(uint64(height))
 		},
 	}

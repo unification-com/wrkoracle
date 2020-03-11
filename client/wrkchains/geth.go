@@ -1,4 +1,4 @@
-package geth
+package wrkchains
 
 import (
 	"context"
@@ -8,11 +8,24 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/viper"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/unification-com/wrkoracle/types"
 )
 
-// GetBlock is used to get the block headers for a given height from a geth based WRKChain
-func GetBlock(height uint64) (types.WrkChainBlockHeader, error) {
+// Geth is a structure for holding a Geth based WRKChain client
+type Geth struct {
+	log log.Logger
+}
+
+// NewGethClient returns a new Geth struct
+func NewGethClient(log log.Logger) *Geth {
+	return &Geth{
+		log: log.With("pkg", "wrkchains").With("clnt", "geth"),
+	}
+}
+
+// GetBlockAtHeight is used to get the block headers for a given height from a geth based WRKChain
+func (g Geth) GetBlockAtHeight(height uint64) (types.WrkChainBlockHeader, error) {
 
 	wrkChainClient, _ := ethclient.Dial(viper.GetString(types.FlagWrkchainRpc))
 
@@ -44,15 +57,15 @@ func GetBlock(height uint64) (types.WrkChainBlockHeader, error) {
 	hash3Ref := viper.GetString(types.FlagHash3)
 
 	if len(hash1Ref) > 0 {
-		hash1 = getHash(latestWrkchainHeader, hash1Ref)
+		hash1 = g.getHash(latestWrkchainHeader, hash1Ref)
 	}
 
 	if len(hash2Ref) > 0 {
-		hash2 = getHash(latestWrkchainHeader, hash2Ref)
+		hash2 = g.getHash(latestWrkchainHeader, hash2Ref)
 	}
 
 	if len(hash3Ref) > 0 {
-		hash3 = getHash(latestWrkchainHeader, hash3Ref)
+		hash3 = g.getHash(latestWrkchainHeader, hash3Ref)
 	}
 
 	wrkchainBlock := types.NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
@@ -60,7 +73,7 @@ func GetBlock(height uint64) (types.WrkChainBlockHeader, error) {
 	return wrkchainBlock, nil
 }
 
-func getHash(header *ethtypes.Header, ref string) string {
+func (g Geth) getHash(header *ethtypes.Header, ref string) string {
 	switch ref {
 	case "ReceiptHash":
 		return header.ReceiptHash.String()
@@ -69,7 +82,7 @@ func getHash(header *ethtypes.Header, ref string) string {
 	case "Root":
 		return header.Root.String()
 	default:
-		fmt.Println(fmt.Sprintf("unknown hash type '%s'", ref))
+		g.log.Error(fmt.Sprintf("unknown hash type '%s'", ref))
 		return ""
 	}
 }

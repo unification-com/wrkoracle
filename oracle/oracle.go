@@ -1,43 +1,48 @@
 package oracle
 
 import (
-	"fmt"
+	"os"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys"
 	"github.com/spf13/viper"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/unification-com/wrkoracle/client/mainchain"
 	"github.com/unification-com/wrkoracle/client/wrkchains"
 	"github.com/unification-com/wrkoracle/types"
 )
 
-// WrkOracle is an object to hold Oracle settings, keybase, codec, and context
+// WrkOracle is an object to hold Oracle settings, and the WRKChain and Mainchain clients
 type WrkOracle struct {
-	wrkchainId  uint64
-	wrkchainRpc string
-	frequency   uint64
-	cliCxt      context.CLIContext
-	kb          keys.Keybase
-	cdc         *codec.Codec
+	frequency       uint64
+	log             log.Logger
+	wrkChain        *wrkchains.WrkChain
+	mainchainClient *mainchain.MainchainClient
 }
 
 // NewWrkOracle returns an initialised WrkOracle object
-func NewWrkOracle(cliCxt context.CLIContext, kb keys.Keybase, cdc *codec.Codec) WrkOracle {
+func NewWrkOracle(cliCxt context.CLIContext, kb keys.Keybase, cdc *codec.Codec) (WrkOracle, error) {
 
-	wrkchainId := viper.GetUint64(types.FlagWrkChainId)
-	frequency := viper.GetUint64(types.FlagFrequency)
-	wrkchainRpc := viper.GetString(types.FlagWrkchainRpc)
+	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
+	mc := mainchain.NewMainchainClient(cliCxt, kb, cdc, logger)
+	err := mc.SetWrkchainMetaData()
+	if err != nil {
+		return WrkOracle{}, err
+	}
+	wrkChain, err := wrkchains.NewWrkChain(mc.GetWrkchainMeta(), logger)
+
+	if err != nil {
+		return WrkOracle{}, err
+	}
 
 	return WrkOracle{
-		wrkchainId:  wrkchainId,
-		frequency:   frequency,
-		wrkchainRpc: wrkchainRpc,
-		cliCxt:      cliCxt,
-		kb:          kb,
-		cdc:         cdc,
-	}
+		frequency:       viper.GetUint64(types.FlagFrequency),
+		log:             logger.With("pkg", "oracle"),
+		mainchainClient: mc,
+		wrkChain:        wrkChain,
+	}, nil
 }
 
 // Run runs the WRKOracle in automated mode
@@ -47,50 +52,46 @@ func (wo WrkOracle) Run() error {
 
 func (wo WrkOracle) runOracle() error {
 
-	fmt.Println("running")
-
-	mc := mainchain.NewMainchainClient(wo.wrkchainId, wo.cliCxt, wo.kb, wo.cdc)
-	err := mc.SetWrkchainMetaData()
-	if err != nil {
-		return err
-	}
+	wo.log.Info("Start running WRKOracle")
 
 	errors := make(chan error)
 
 	for {
 		go func() {
 			timeNow := time.Now().Local()
-			fmt.Println(fmt.Sprintf("starting %s", timeNow))
+			wo.log.Info("start poll", "time", timeNow)
 			dueAt := time.Now().Local().Add(time.Duration(wo.frequency) * time.Second)
-			err = wo.poll(&mc)
+			err := wo.poll()
 			if err != nil {
 				errors <- err
 				return
 			}
-			fmt.Println(fmt.Sprintf("Done. Next poll due at %s", dueAt))
-			fmt.Println("-----------------------------------")
+			wo.log.Info("end poll. Next poll due:", "due", dueAt)
+			wo.log.Info("-----------------------------------")
 		}()
 		select {
 		case err := <-errors:
+			wo.log.Error(err.Error())
 			return err
 		case <-time.After(time.Duration(wo.frequency) * time.Second):
 		}
 	}
 }
 
-func (wo WrkOracle) poll(mc *mainchain.MainchainClient) error {
+func (wo WrkOracle) poll() error {
 
-	fmt.Println("polling WRKChain for latest block")
-	header, err := wrkchains.GetLatestBlock(mc.GetWrkchainMeta())
+	wo.log.Info("polling WRKChain for latest block")
+	header, err := wo.wrkChain.GetLatestBlock()
 
 	if err != nil {
+		wo.log.Error(err.Error())
 		return err
 	}
 
-	mc.SetRecordFees()
+	wo.mainchainClient.SetRecordFees()
 
-	fmt.Println("recording latest WRKChain block")
-	return mc.BroadcastToMainchain(header)
+	wo.log.Info("recording latest WRKChain block")
+	return wo.mainchainClient.BroadcastToMainchain(header)
 }
 
 // RecordSingleBlock is used to record a single WRKChain block header to Mainchain
@@ -100,21 +101,16 @@ func (wo WrkOracle) RecordSingleBlock(height uint64) error {
 
 func (wo WrkOracle) recordBlock(height uint64) error {
 
-	mc := mainchain.NewMainchainClient(wo.wrkchainId, wo.cliCxt, wo.kb, wo.cdc)
-	err := mc.SetWrkchainMetaData()
+	wo.log.Info("getting requested WRKChain block header and recording", "moniker", wo.mainchainClient.GetWrkchainMeta().Moniker, "height", height)
+
+	header, err := wo.wrkChain.GetWrkChainBlock(height)
+
 	if err != nil {
+		wo.log.Error(err.Error())
 		return err
 	}
 
-	fmt.Println(fmt.Sprintf("getting WRKChain '%s' block %d and recording", mc.GetWrkchainMeta().Moniker, height))
+	wo.mainchainClient.SetRecordFees()
 
-	header, err := wrkchains.GetWrkChainBlock(mc.GetWrkchainMeta(), height)
-
-	if err != nil {
-		return err
-	}
-
-	mc.SetRecordFees()
-
-	return mc.BroadcastToMainchain(header)
+	return wo.mainchainClient.BroadcastToMainchain(header)
 }

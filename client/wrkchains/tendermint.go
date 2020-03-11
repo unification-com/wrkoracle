@@ -2,6 +2,7 @@ package wrkchains
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/log"
@@ -12,29 +13,35 @@ import (
 
 // Tendermint is a structure for holding a Tendermint based WRKChain client
 type Tendermint struct {
-	log log.Logger
+	log               log.Logger
+	supportedHashMaps []string
 }
 
 // NewTendermintClient returns a new Tendermint struct
-func NewTendermintClient(log log.Logger) *Tendermint {
+func NewTendermintClient() *Tendermint {
 	return &Tendermint{
-		log: log.With("pkg", "wrkchains").With("clnt", "tendermint"),
+		supportedHashMaps: []string{"ReceiptHash", "TxHash", "Root", "UncleHash", "MixDigest"},
 	}
 }
 
+// SetLogger sets the logger
+func (t *Tendermint) SetLogger(log log.Logger) {
+	t.log = log
+}
+
 // GetBlockAtHeight is used to get the block headers for a given height from a tendermint based WRKChain
-func (t Tendermint) GetBlockAtHeight(height uint64) (types.WrkChainBlockHeader, error) {
+func (t Tendermint) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	heightAt := int64(height)
 	wrkChainClient, err := tmclient.NewHTTP(viper.GetString(types.FlagWrkchainRpc), "/websocket")
 
 	if err != nil {
-		return types.WrkChainBlockHeader{}, err
+		return WrkChainBlockHeader{}, err
 	}
 
 	if heightAt == 0 {
 		status, err := wrkChainClient.Status()
 		if err != nil {
-			return types.WrkChainBlockHeader{}, err
+			return WrkChainBlockHeader{}, err
 		}
 		heightAt = status.SyncInfo.LatestBlockHeight
 	}
@@ -42,7 +49,7 @@ func (t Tendermint) GetBlockAtHeight(height uint64) (types.WrkChainBlockHeader, 
 	latestWrkchainBlock, err := wrkChainClient.Block(&heightAt)
 
 	if err != nil {
-		return types.WrkChainBlockHeader{}, err
+		return WrkChainBlockHeader{}, err
 	}
 
 	blockHash := latestWrkchainBlock.BlockID.Hash.String()
@@ -73,9 +80,33 @@ func (t Tendermint) GetBlockAtHeight(height uint64) (types.WrkChainBlockHeader, 
 		hash3 = t.getHash(latestWrkchainBlock.Block.Header, hash3Ref)
 	}
 
-	wrkchainBlock := types.NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
+	wrkchainBlock := NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
 
 	return wrkchainBlock, nil
+}
+
+// IsSupportedHash checks if the given hashType for the given chainType is currently supported by WRKOracle
+func (t Tendermint) IsSupportedHash(hashType string) (bool, error) {
+	for _, h := range t.supportedHashMaps {
+		if hashType == h {
+			return true, nil
+		}
+	}
+	return false, fmt.Errorf("unsupported hash map '%s' for wrkchain type 'tendermint'. supported types: %s", hashType, strings.Join(t.supportedHashMaps, ", "))
+}
+
+// GetDefaultHashMap returns the default has mapping for a given reference
+func (t Tendermint) GetDefaultHashMap(hashRef string) string {
+	switch hashRef {
+	case "hash1":
+		return "DataHash"
+	case "hash2":
+		return "AppHash"
+	case "hash3":
+		return "ValidatorsHash"
+	default:
+		return ""
+	}
 }
 
 func (t Tendermint) getHash(header tmtypes.Header, ref string) string {

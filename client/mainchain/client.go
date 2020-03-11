@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/unification-com/mainchain/x/wrkchain"
+	"github.com/unification-com/wrkoracle/client/wrkchains"
 	"github.com/unification-com/wrkoracle/types"
 )
 
@@ -25,7 +26,7 @@ import (
 type MainchainClient struct {
 	wrkchainId    uint64
 	mainchainRest string
-	wrkchainMeta  types.WrkChainMeta
+	wrkchainMeta  wrkchains.WrkChainMeta
 	cliCtx        context.CLIContext
 	kb            keys.Keybase
 	cdc           *codec.Codec
@@ -41,7 +42,7 @@ func NewMainchainClient(cliCtx context.CLIContext, kb keys.Keybase, cdc *codec.C
 
 	return &MainchainClient{
 		wrkchainId: wrkChainId,
-		wrkchainMeta: types.WrkChainMeta{
+		wrkchainMeta: wrkchains.WrkChainMeta{
 			Type: wrkchainType,
 		},
 		mainchainRest: mainchainRest,
@@ -55,7 +56,7 @@ func NewMainchainClient(cliCtx context.CLIContext, kb keys.Keybase, cdc *codec.C
 
 // BroadcastToMainchain generates and broadcasts a TX containing a MsgRecordWrkChainBlock
 // message to Mainchain
-func (mc MainchainClient) BroadcastToMainchain(header types.WrkChainBlockHeader) error {
+func (mc MainchainClient) BroadcastToMainchain(header wrkchains.WrkChainBlockHeader) error {
 
 	mc.log.Info("Generate msg")
 
@@ -128,14 +129,14 @@ func (mc MainchainClient) txBroadcaster(cliCtx context.CLIContext, msgs []sdk.Ms
 
 func (mc MainchainClient) parseTsRes(res sdk.TxResponse) error {
 
-	mc.log.Info("Tx broadcast", "hash", res.TxHash)
+	mc.log.Info("Tx broadcast", "txhash", res.TxHash)
 
 	if len(res.Codespace) > 0 && res.Code > 0 {
 		return fmt.Errorf("TX ERROR! Codespace: %s, Code: %d, Message: %s", res.Codespace, res.Code, res.RawLog)
 	}
 
-	mc.log.Info("Success! Recorded in Mainchain Block", "height", res.Height)
-	mc.log.Info("Gas used:", "gas", res.GasUsed)
+	mc.log.Info("Success! Recorded in Mainchain Block", "mainchain_height", res.Height)
+	mc.log.Info("Gas used", "gas", res.GasUsed)
 
 	return nil
 }
@@ -146,7 +147,7 @@ func (mc MainchainClient) GetWrkchainType() string {
 }
 
 // GetWrkchainMeta returns the WRKChain's metadata object
-func (mc MainchainClient) GetWrkchainMeta() types.WrkChainMeta {
+func (mc MainchainClient) GetWrkchainMeta() wrkchains.WrkChainMeta {
 	return mc.wrkchainMeta
 }
 
@@ -173,7 +174,7 @@ func (mc *MainchainClient) SetWrkchainMetaData() error {
 			return err
 		}
 
-		var wc types.WrkChainMetaQueryResponse
+		var wc wrkchains.WrkChainMetaQueryResponse
 		err = json.Unmarshal(body, &wc)
 		if err != nil {
 			return err
@@ -219,7 +220,7 @@ func (mc *MainchainClient) SetRecordFees() {
 		return
 	}
 
-	var fees types.FeeParamsQueryResponse
+	var fees FeeParamsQueryResponse
 	err = json.Unmarshal(body, &fees)
 	if err == nil {
 		fee := fees.Result.FeeRecord + fees.Result.Denom

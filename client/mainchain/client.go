@@ -3,7 +3,6 @@ package mainchain
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tendermint/tendermint/libs/log"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -17,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	"github.com/spf13/viper"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/unification-com/mainchain/x/wrkchain"
 	"github.com/unification-com/wrkoracle/types"
 )

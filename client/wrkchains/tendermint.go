@@ -2,18 +2,20 @@ package wrkchains
 
 import (
 	"fmt"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/spf13/viper"
+	"github.com/tendermint/tendermint/libs/log"
 	tmclient "github.com/tendermint/tendermint/rpc/client"
 	tmtypes "github.com/tendermint/tendermint/types"
 	"github.com/unification-com/wrkoracle/types"
 )
 
+// Tendermint is a structure for holding a Tendermint based WRKChain client
 type Tendermint struct {
 	log log.Logger
 }
 
+// NewTendermintClient returns a new Tendermint struct
 func NewTendermintClient(log log.Logger) *Tendermint {
 	return &Tendermint{
 		log: log.With("pkg", "wrkchains").With("clnt", "tendermint"),

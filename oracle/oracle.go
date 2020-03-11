@@ -14,7 +14,7 @@ import (
 	"github.com/unification-com/wrkoracle/types"
 )
 
-// WrkOracle is an object to hold Oracle settings, keybase, codec, and context
+// WrkOracle is an object to hold Oracle settings, and the WRKChain and Mainchain clients
 type WrkOracle struct {
 	frequency       uint64
 	log             log.Logger
@@ -41,7 +41,7 @@ func NewWrkOracle(cliCxt context.CLIContext, kb keys.Keybase, cdc *codec.Codec) 
 		frequency:       viper.GetUint64(types.FlagFrequency),
 		log:             logger.With("pkg", "oracle"),
 		mainchainClient: mc,
-		wrkChain: wrkChain,
+		wrkChain:        wrkChain,
 	}, nil
 }
 

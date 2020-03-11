@@ -2,18 +2,20 @@ package wrkchains
 
 import (
 	"fmt"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/spf13/viper"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/unification-com/wrkoracle/types"
 )
 
+// WrkChain is a top level struct to hold WRKChain data
 type WrkChain struct {
 	wrkChainClient WrkChainClient
-	wrkchainMeta types.WrkChainMeta
-	log log.Logger
+	wrkchainMeta   types.WrkChainMeta
+	log            log.Logger
 }
 
+// NewWrkChain returns a new initialised WrkChain
 func NewWrkChain(wrkchainMeta types.WrkChainMeta, log log.Logger) (*WrkChain, error) {
 	var wrkChainClient WrkChainClient
 
@@ -28,8 +30,8 @@ func NewWrkChain(wrkchainMeta types.WrkChainMeta, log log.Logger) (*WrkChain, er
 
 	return &WrkChain{
 		wrkChainClient: wrkChainClient,
-		wrkchainMeta: wrkchainMeta,
-		log: log.With("pkg", "wrkchains"),
+		wrkchainMeta:   wrkchainMeta,
+		log:            log.With("pkg", "wrkchains"),
 	}, nil
 }
 

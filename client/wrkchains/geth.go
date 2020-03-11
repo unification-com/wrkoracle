@@ -3,19 +3,21 @@ package wrkchains
 import (
 	"context"
 	"fmt"
-	"github.com/tendermint/tendermint/libs/log"
 	"math/big"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/viper"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/unification-com/wrkoracle/types"
 )
 
+// Geth is a structure for holding a Geth based WRKChain client
 type Geth struct {
 	log log.Logger
 }
 
+// NewGethClient returns a new Geth struct
 func NewGethClient(log log.Logger) *Geth {
 	return &Geth{
 		log: log.With("pkg", "wrkchains").With("clnt", "geth"),

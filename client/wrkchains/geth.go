@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"strings"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -14,18 +15,24 @@ import (
 
 // Geth is a structure for holding a Geth based WRKChain client
 type Geth struct {
-	log log.Logger
+	log               log.Logger
+	supportedHashMaps []string
 }
 
 // NewGethClient returns a new Geth struct
-func NewGethClient(log log.Logger) *Geth {
+func NewGethClient() *Geth {
 	return &Geth{
-		log: log.With("pkg", "wrkchains").With("clnt", "geth"),
+		supportedHashMaps: []string{"ReceiptHash", "TxHash", "Root", "UncleHash", "MixDigest"},
 	}
 }
 
+// SetLogger sets the logger
+func (g *Geth) SetLogger(log log.Logger) {
+	g.log = log
+}
+
 // GetBlockAtHeight is used to get the block headers for a given height from a geth based WRKChain
-func (g Geth) GetBlockAtHeight(height uint64) (types.WrkChainBlockHeader, error) {
+func (g Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 
 	wrkChainClient, _ := ethclient.Dial(viper.GetString(types.FlagWrkchainRpc))
 
@@ -38,7 +45,7 @@ func (g Geth) GetBlockAtHeight(height uint64) (types.WrkChainBlockHeader, error)
 	latestWrkchainHeader, err := wrkChainClient.HeaderByNumber(context.Background(), atHeight)
 
 	if err != nil {
-		return types.WrkChainBlockHeader{}, err
+		return WrkChainBlockHeader{}, err
 	}
 
 	blockHash := latestWrkchainHeader.Hash().String()
@@ -68,9 +75,33 @@ func (g Geth) GetBlockAtHeight(height uint64) (types.WrkChainBlockHeader, error)
 		hash3 = g.getHash(latestWrkchainHeader, hash3Ref)
 	}
 
-	wrkchainBlock := types.NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
+	wrkchainBlock := NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
 
 	return wrkchainBlock, nil
+}
+
+// IsSupportedHash checks if the given hashType for the given chainType is currently supported by WRKOracle
+func (g Geth) IsSupportedHash(hashType string) (bool, error) {
+	for _, h := range g.supportedHashMaps {
+		if hashType == h {
+			return true, nil
+		}
+	}
+	return false, fmt.Errorf("unsupported hash map '%s' for wrkchain type 'geth'. supported types: %s", hashType, strings.Join(g.supportedHashMaps, ", "))
+}
+
+// GetDefaultHashMap returns the default has mapping for a given reference
+func (g Geth) GetDefaultHashMap(hashRef string) string {
+	switch hashRef {
+	case "hash1":
+		return "ReceiptHash"
+	case "hash2":
+		return "TxHash"
+	case "hash3":
+		return "Root"
+	default:
+		return ""
+	}
 }
 
 func (g Geth) getHash(header *ethtypes.Header, ref string) string {
@@ -81,6 +112,10 @@ func (g Geth) getHash(header *ethtypes.Header, ref string) string {
 		return header.TxHash.String()
 	case "Root":
 		return header.Root.String()
+	case "UncleHash":
+		return header.UncleHash.String()
+	case "MixDigest":
+		return header.MixDigest.String()
 	default:
 		g.log.Error(fmt.Sprintf("unknown hash type '%s'", ref))
 		return ""

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/unification-com/wrkoracle/client/wrkchains"
 	"io"
 	"io/ioutil"
 	"os"
@@ -130,21 +131,21 @@ func setConfValue(tree *toml.Tree, key, value string) error {
 		tree.Set(key, value)
 
 	case "wrkchain-type":
-		if !types.IsSupportedWrkchainType(value) {
-			supportedTypes := strings.Join(types.SupportedWrkchainTypes, ", ")
+		if !wrkchains.IsSupportedWrkchainType(value) {
+			supportedTypes := strings.Join(wrkchains.SupportedWrkchainTypes, ", ")
 			return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", value, supportedTypes)
 		}
 		tree.Set(key, value)
 
 	case "hash1", "hash2", "hash3":
 		currentType := tree.Get("wrkchain-type").(string)
-		if !types.IsSupportedWrkchainType(currentType) {
-			supportedTypes := strings.Join(types.SupportedWrkchainTypes, ", ")
+		if !wrkchains.IsSupportedWrkchainType(currentType) {
+			supportedTypes := strings.Join(wrkchains.SupportedWrkchainTypes, ", ")
 			return fmt.Errorf("unsupported WRKChain type detected in config: %s. supported types: %s", currentType, supportedTypes)
 		}
-		if !types.IsSupportedHash(currentType, value) {
-			supportedHashes := strings.Join(types.SupportedHashMaps[currentType], ", ")
-			return fmt.Errorf("unsupported hash map '%s' for wrkchain type %s. supported types: %s", value, currentType, supportedHashes)
+		isSupported, err := wrkchains.IsSupportedHash(currentType, value)
+		if !isSupported || err != nil {
+			return err
 		}
 		tree.Set(key, value)
 
@@ -217,8 +218,8 @@ func runInitConfigCmd(cmd *cobra.Command, args []string) error {
 
 	wrkchainType := args[0]
 
-	if !types.IsSupportedWrkchainType(wrkchainType) {
-		supportedTypes := strings.Join(types.SupportedWrkchainTypes, ", ")
+	if !wrkchains.IsSupportedWrkchainType(wrkchainType) {
+		supportedTypes := strings.Join(wrkchains.SupportedWrkchainTypes, ", ")
 		return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", wrkchainType, supportedTypes)
 	}
 
@@ -267,21 +268,15 @@ func runInitConfigCmd(cmd *cobra.Command, args []string) error {
 
 func initChainType(wrkchainType string, tree *toml.Tree) error {
 
-	switch wrkchainType {
-	case "geth":
-		tree.Set("hash1", "ReceiptHash")
-		tree.Set("hash2", "TxHash")
-		tree.Set("hash3", "Root")
-	case "tendermint", "cosmos":
-		tree.Set("hash1", "DataHash")
-		tree.Set("hash2", "AppHash")
-		tree.Set("hash3", "ValidatorsHash")
-	default:
+	if !wrkchains.IsSupportedWrkchainType(wrkchainType) {
 		return fmt.Errorf("unsupported WRKChain type: %s", wrkchainType)
 	}
 
-	return nil
+	tree.Set("hash1", wrkchains.GetDefaultHashMap(wrkchainType, "hash1"))
+	tree.Set("hash2", wrkchains.GetDefaultHashMap(wrkchainType, "hash2"))
+	tree.Set("hash3", wrkchains.GetDefaultHashMap(wrkchainType, "hash3"))
 
+	return nil
 }
 
 func ensureConfFile(rootDir string) (string, error) {

@@ -138,26 +138,28 @@ wrkoracle run
 WRKOracle will output its status as follows:
 
 ```bash
-starting 2020-03-04 14:43:41.580232302 +0000 GMT
-polling WRKChain for latest block
-Get block for WRKChain 'wrkchain1', type 'geth' at http://127.0.0.1:7545
-Got WRKChain block
-WRKChain Height: 61
-WRKChain Block Hash: 0x81a23fe7c73711260bebae8b027a6d0897f305407fdb13e6ed0a4effdd2d6e74
-WRKChain Parent Hash: 0xe3cdf99657d23461ee590477eb1aec1873b52824910e5369964039757defffdc
-WRKChain Hash1: 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-WRKChain Hash2: 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-WRKChain Hash3: 0xe534373922c7a6e23ba0a96bcdf53ade135ad7117b27cc9b0706c3e02360e653
-recording latest WRKChain block
-Generate msg
-Broadcasting Tx and waiting for response...
-WRKChain header hash recording fee: 1000000000nund
-gas estimate: 140275
-Tx Hash: D1F138682C7CB49A67E777CF40B9E242D5C89F754781BF6EDAE78918B3080996
-Success! Recorded in Mainchain Block #2737
-Gas used: 92202
-Done. Next poll due at 2020-03-04 14:44:41.580299426 +0000 GMT
------------------------------------
+I[2020-03-11|12:55:36.872] Check WRKChain metadata                      pkg=mainchain
+I[2020-03-11|12:55:36.880] Start running WRKOracle                      pkg=oracle
+I[2020-03-11|12:55:36.880] start poll                                   pkg=oracle time=2020-03-11T12:55:36.880866909Z
+I[2020-03-11|12:55:36.880] polling WRKChain for latest block            pkg=oracle
+I[2020-03-11|12:55:36.881] Get block for WRKChain                       pkg=wrkchains moniker=wrkchain1 type=geth rpc=http://127.0.0.1:7545
+I[2020-03-11|12:55:36.893] Got WRKChain block                           pkg=wrkchains
+I[2020-03-11|12:55:36.893] WRKChain Height                              pkg=wrkchains height=13289
+I[2020-03-11|12:55:36.893] WRKChain Block Hash                          pkg=wrkchains blockhash=0x349723088c3fa5a8871c31e256cd2a8ff5e1c19d75c5e76d48b85e28c1038f0d
+I[2020-03-11|12:55:36.893] WRKChain Parent Hash                         pkg=wrkchains parenthash=0xb9673407d6ee07ccbb3d8f7808666b879ec79a1e423d6cdae05c486223a4fc00
+I[2020-03-11|12:55:36.893] WRKChain Hash1                               pkg=wrkchains ref=ReceiptHash value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+I[2020-03-11|12:55:36.893] WRKChain Hash2                               pkg=wrkchains ref=TxHash value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+I[2020-03-11|12:55:36.893] WRKChain Hash3                               pkg=wrkchains ref=Root value=0xcf4a880479b49b6439dd833b27a387d58aff0d97df68d1c31e40d9bc2f814b7d
+I[2020-03-11|12:55:36.897] recording latest WRKChain block              pkg=oracle
+I[2020-03-11|12:55:36.897] Generate msg                                 pkg=mainchain
+I[2020-03-11|12:55:36.897] Broadcasting Tx and waiting for response...  pkg=mainchain
+I[2020-03-11|12:55:36.897] WRKChain header hash recording fee           pkg=mainchain fee=1000000000nund
+I[2020-03-11|12:55:36.911] gas estimate: 147430                         pkg=mainchain
+I[2020-03-11|12:55:41.880] Tx broadcast                                 pkg=mainchain hash=3C0AFAFC23E061677391E31495658F5388F1A6815A99FF2A680C682398FFABDB
+I[2020-03-11|12:55:41.880] Success! Recorded in Mainchain Block         pkg=mainchain height=2531
+I[2020-03-11|12:55:41.881] Gas used:                                    pkg=mainchain gas=96972
+I[2020-03-11|12:55:41.881] end poll. Next poll due:                     pkg=oracle due=2020-03-11T12:55:46.880958102Z
+I[2020-03-11|12:55:41.881] -----------------------------------          pkg=oracle
 ```
 
 ## Submitting single block headers
@@ -178,22 +180,23 @@ wrkoracle record 2424
 The result will be output:
 
 ```bash
-getting WRKChain 'wrkchain1' block 2424 and recording
-Get block for WRKChain 'wrkchain1', type 'geth' at http://127.0.0.1:7545
-Got WRKChain block
-WRKChain Height: 2424
-WRKChain Block Hash: 0x4fee5d6dd69b21b37c0923d1c1ded45ace4c94af3d1f18a423ea2e25052c25d6
-WRKChain Parent Hash: 0x8ae2443997e24ec247116efe275af3cae7bbe1a62071cf52c43cd0e233fac551
-WRKChain Hash1: 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-WRKChain Hash2: 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-WRKChain Hash3: 0x7cab995324db9a8556416274bd3367ec385bd3c8643e95052eab60a8e9537681
-Generate msg
-Broadcasting Tx and waiting for response...
-WRKChain header hash recording fee: 1000000000nund
-gas estimate: 140275
-Tx Hash: 4EAFE4B59198AB4F34A8167FA83042AA1D501A1F2B3A192B8F5496F2DE92E0A3
-Success! Recorded in Mainchain Block #2789
-Gas used: 92202
+I[2020-03-11|12:56:32.424] Check WRKChain metadata                      pkg=mainchain
+I[2020-03-11|12:56:32.427] getting requested WRKChain block header and recording pkg=oracle moniker=wrkchain1 height=12222
+I[2020-03-11|12:56:32.427] Get block for WRKChain                       pkg=wrkchains moniker=wrkchain1 type=geth rpc=http://127.0.0.1:7545
+I[2020-03-11|12:56:32.444] Got WRKChain block                           pkg=wrkchains
+I[2020-03-11|12:56:32.444] WRKChain Height                              pkg=wrkchains height=12222
+I[2020-03-11|12:56:32.444] WRKChain Block Hash                          pkg=wrkchains blockhash=0x30e0ddcb301abc5e4312a3f84d4b8dc184d47b88d21d75e2247b2bee4affb824
+I[2020-03-11|12:56:32.444] WRKChain Parent Hash                         pkg=wrkchains parenthash=0x2cb59e0daeaac6372f7205e8dd32a6e9bf64ccadd7a1dc85823e9cc6d9a04a08
+I[2020-03-11|12:56:32.444] WRKChain Hash1                               pkg=wrkchains ref=ReceiptHash value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+I[2020-03-11|12:56:32.444] WRKChain Hash2                               pkg=wrkchains ref=TxHash value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+I[2020-03-11|12:56:32.444] WRKChain Hash3                               pkg=wrkchains ref=Root value=0xea0d716b09464a350b67f13001e67ab04518a58ba7f745f67078693698a47e34
+I[2020-03-11|12:56:32.446] Generate msg                                 pkg=mainchain
+I[2020-03-11|12:56:32.446] Broadcasting Tx and waiting for response...  pkg=mainchain
+I[2020-03-11|12:56:32.446] WRKChain header hash recording fee           pkg=mainchain fee=1000000000nund
+I[2020-03-11|12:56:32.451] gas estimate: 140335                         pkg=mainchain
+I[2020-03-11|12:56:35.492] Tx broadcast                                 pkg=mainchain hash=1F0A5DD144D7B6F616552E5461F81769674700B9707D22EF380A9447E0D63881
+I[2020-03-11|12:56:35.492] Success! Recorded in Mainchain Block         pkg=mainchain height=2541
+I[2020-03-11|12:56:35.492] Gas used:                                    pkg=mainchain gas=92242
 ```
 
 ## Hash mapping
@@ -207,16 +210,27 @@ corresponding entries for `hash1`, `hash2` and `hash3`. Leaving the entries empt
 in the hashes being omitted from the WRKChain hash submission. The initialised defaults for 
 each chain type are listed below.
 
+**Note**: _Neither Mainchain or WRKOracle currently keep any internal records regarding what
+is mapped onto the `hash1`, `hash2` and `hash3` values at submission time. It is up to the 
+WRKChain and WRKOracle operators to keep track of this information externally so that any 
+validation process can compare the correct hash values. This is especially important if the 
+hash mapping is changed at any point during the life of the WRKChain. For example, from 
+WRKChain block height 100,000, the operator may wish to change `hash1` submissions from 
+`ReceiptHash` to `UncleHash`, in which case the operator should keep a record of this 
+and update any validation processes accordingly._
+
 ### `geth` based chains
 
-For `geth` based WRKChains, WRKOracle supports the following three optional hashes 
+For `geth` based WRKChains, WRKOracle supports the following 5 optional hashes 
 to be submitted:
 
 1. `Header.ReceiptHash` - Merkle root hash for the Receipts
 2. `Header.TxHash` - Merkle root hash for the Tx
 3. `Header.Root` - Merkle root hash for Root
+4. `Header.UncleHash` - Uncle Hash
+5. `Header.MixDigest`
 
-By default during initialisation, WRKOracle maps them as followed:
+By default during initialisation, WRKOracle maps them as follows:
 
 `hash1` = `ReceiptHash`  
 `hash2` = `TxHash`  

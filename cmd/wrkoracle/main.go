@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/unification-com/wrkoracle/client/wrkchains"
 	"os"
 	"path"
 	"strconv"
@@ -116,8 +117,8 @@ func RunCmd(cdc *codec.Codec) *cobra.Command {
 				return fmt.Errorf("missing WRKChain Type: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainType, defaultHome, types.FlagWrkchainType)
 			}
 
-			if !types.IsSupportedWrkchainType(wrkchainType) {
-				supportedTypes := strings.Join(types.SupportedWrkchainTypes, ", ")
+			if !wrkchains.IsSupportedWrkchainType(wrkchainType) {
+				supportedTypes := strings.Join(wrkchains.SupportedWrkchainTypes, ", ")
 				return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", wrkchainType, supportedTypes)
 			}
 
@@ -186,8 +187,8 @@ func RecordSingleCmd(cdc *codec.Codec) *cobra.Command {
 				return fmt.Errorf("missing WRKChain Type: set %s in %s/config/config.toml or pass with --%s flag", types.FlagWrkchainType, defaultHome, types.FlagWrkchainType)
 			}
 
-			if !types.IsSupportedWrkchainType(wrkchainType) {
-				supportedTypes := strings.Join(types.SupportedWrkchainTypes, ", ")
+			if !wrkchains.IsSupportedWrkchainType(wrkchainType) {
+				supportedTypes := strings.Join(wrkchains.SupportedWrkchainTypes, ", ")
 				return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", wrkchainType, supportedTypes)
 			}
 

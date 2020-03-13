@@ -34,7 +34,10 @@ func (g *Geth) SetLogger(log log.Logger) {
 // GetBlockAtHeight is used to get the block headers for a given height from a geth based WRKChain
 func (g Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 
-	wrkChainClient, _ := ethclient.Dial(viper.GetString(types.FlagWrkchainRpc))
+	wrkChainClient, err := ethclient.Dial(viper.GetString(types.FlagWrkchainRpc))
+	if err != nil {
+		return  WrkChainBlockHeader{}, err
+	}
 
 	atHeight := big.NewInt(0).SetUint64(height)
 
@@ -76,6 +79,8 @@ func (g Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	}
 
 	wrkchainBlock := NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
+
+	wrkChainClient.Close()
 
 	return wrkchainBlock, nil
 }

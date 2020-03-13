@@ -32,10 +32,10 @@ func (t *Tendermint) SetLogger(log log.Logger) {
 // GetBlockAtHeight is used to get the block headers for a given height from a tendermint based WRKChain
 func (t Tendermint) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	heightAt := int64(height)
-	wrkChainClient, err := tmclient.NewHTTP(viper.GetString(types.FlagWrkchainRpc), "/websocket")
 
+	wrkChainClient, err := tmclient.NewHTTP(viper.GetString(types.FlagWrkchainRpc), "/websocket")
 	if err != nil {
-		return WrkChainBlockHeader{}, err
+		return  WrkChainBlockHeader{}, err
 	}
 
 	if heightAt == 0 {
@@ -81,6 +81,8 @@ func (t Tendermint) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error)
 	}
 
 	wrkchainBlock := NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
+
+	wrkChainClient.Quit()
 
 	return wrkchainBlock, nil
 }

@@ -86,9 +86,9 @@ broadcast-mode = "block"
 chain-id = ""
 frequency = "60"
 from = ""
-hash1 = "ReceiptHash"
-hash2 = "TxHash"
-hash3 = "Root"
+hash1 = "ReceiptsRoot"
+hash2 = "TxRoot"
+hash3 = "StateRoot"
 indent = true
 keyring-backend = "os"
 mainchain-rest = ""
@@ -123,7 +123,7 @@ own local full Mainchain node. **Required**
 - `trust-node`: Trust connected full node (don't verify proofs for responses). **Required**
 - `wrkchain-id`: The integer ID of your WRKChain, as given when the WRKChain was registered on Mainchain. **Required**
 - `wrkchain-rpc`: The RPC node where WRKOracle can query your WRKChain, e.g. `http://127.0.0.1:7545`, 
-`tcp://172.25.0.3:26661` etc.. **Required**
+`http://172.25.0.3:26661` etc.. **Required**
 
 ## Running in automated mode
 
@@ -147,9 +147,9 @@ I[2020-03-11|12:55:36.893] Got WRKChain block                           pkg=wrkc
 I[2020-03-11|12:55:36.893] WRKChain Height                              pkg=wrkchains height=13289
 I[2020-03-11|12:55:36.893] WRKChain Block Hash                          pkg=wrkchains blockhash=0x349723088c3fa5a8871c31e256cd2a8ff5e1c19d75c5e76d48b85e28c1038f0d
 I[2020-03-11|12:55:36.893] WRKChain Parent Hash                         pkg=wrkchains parenthash=0xb9673407d6ee07ccbb3d8f7808666b879ec79a1e423d6cdae05c486223a4fc00
-I[2020-03-11|12:55:36.893] WRKChain Hash1                               pkg=wrkchains ref=ReceiptHash value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-I[2020-03-11|12:55:36.893] WRKChain Hash2                               pkg=wrkchains ref=TxHash value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-I[2020-03-11|12:55:36.893] WRKChain Hash3                               pkg=wrkchains ref=Root value=0xcf4a880479b49b6439dd833b27a387d58aff0d97df68d1c31e40d9bc2f814b7d
+I[2020-03-11|12:55:36.893] WRKChain Hash1                               pkg=wrkchains ref=ReceiptsRoot value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+I[2020-03-11|12:55:36.893] WRKChain Hash2                               pkg=wrkchains ref=TxRoot value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+I[2020-03-11|12:55:36.893] WRKChain Hash3                               pkg=wrkchains ref=StateRoot value=0xcf4a880479b49b6439dd833b27a387d58aff0d97df68d1c31e40d9bc2f814b7d
 I[2020-03-11|12:55:36.897] recording latest WRKChain block              pkg=oracle
 I[2020-03-11|12:55:36.897] Generate msg                                 pkg=mainchain
 I[2020-03-11|12:55:36.897] Broadcasting Tx and waiting for response...  pkg=mainchain
@@ -187,9 +187,9 @@ I[2020-03-11|12:56:32.444] Got WRKChain block                           pkg=wrkc
 I[2020-03-11|12:56:32.444] WRKChain Height                              pkg=wrkchains height=12222
 I[2020-03-11|12:56:32.444] WRKChain Block Hash                          pkg=wrkchains blockhash=0x30e0ddcb301abc5e4312a3f84d4b8dc184d47b88d21d75e2247b2bee4affb824
 I[2020-03-11|12:56:32.444] WRKChain Parent Hash                         pkg=wrkchains parenthash=0x2cb59e0daeaac6372f7205e8dd32a6e9bf64ccadd7a1dc85823e9cc6d9a04a08
-I[2020-03-11|12:56:32.444] WRKChain Hash1                               pkg=wrkchains ref=ReceiptHash value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-I[2020-03-11|12:56:32.444] WRKChain Hash2                               pkg=wrkchains ref=TxHash value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-I[2020-03-11|12:56:32.444] WRKChain Hash3                               pkg=wrkchains ref=Root value=0xea0d716b09464a350b67f13001e67ab04518a58ba7f745f67078693698a47e34
+I[2020-03-11|12:56:32.444] WRKChain Hash1                               pkg=wrkchains ref=ReceiptsRoot value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+I[2020-03-11|12:56:32.444] WRKChain Hash2                               pkg=wrkchains ref=TxRoot value=0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+I[2020-03-11|12:56:32.444] WRKChain Hash3                               pkg=wrkchains ref=StateRoot value=0xea0d716b09464a350b67f13001e67ab04518a58ba7f745f67078693698a47e34
 I[2020-03-11|12:56:32.446] Generate msg                                 pkg=mainchain
 I[2020-03-11|12:56:32.446] Broadcasting Tx and waiting for response...  pkg=mainchain
 I[2020-03-11|12:56:32.446] WRKChain header hash recording fee           pkg=mainchain fee=1000000000nund
@@ -216,30 +216,30 @@ WRKChain and WRKOracle operators to keep track of this information externally so
 validation process can compare the correct hash values. This is especially important if the 
 hash mapping is changed at any point during the life of the WRKChain. For example, from 
 WRKChain block height 100,000, the operator may wish to change `hash1` submissions from 
-`ReceiptHash` to `UncleHash`, in which case the operator should keep a record of this 
+`ReceiptsRoot` to `UncleHash`, in which case the operator should keep a record of this 
 and update any validation processes accordingly._
 
 ### `geth` based chains
 
-For `geth` based WRKChains, WRKOracle supports the following 5 optional hashes 
+For `geth` based WRKChains, WRKOracle supports the following 5 optional [block header hashes](https://github.com/ethereum/go-ethereum/blob/master/core/types/block.go#L70) 
 to be submitted:
 
-1. `Header.ReceiptHash` - Merkle root hash for the Receipts
-2. `Header.TxHash` - Merkle root hash for the Tx
-3. `Header.Root` - Merkle root hash for Root
-4. `Header.UncleHash` - Uncle Hash
-5. `Header.MixDigest`
+1. `ReceiptsRoot` - Merkle root hash for the Receipts (`Header.ReceiptHash`)
+2. `TxRoot` - Merkle root hash for the Tx (`Header.TxHash`)
+3. `StateRoot` - Merkle root hash for State Root (`Header.Root`)
+4. `UncleHash` - Uncle Hash (`Header.UncleHash`)
+5. `MixHash` - Mix Digest hash (`Header.MixDigest`)
 
 By default during initialisation, WRKOracle maps them as follows:
 
-`hash1` = `ReceiptHash`  
-`hash2` = `TxHash`  
-`hash3` = `Root`
+`hash1` = `ReceiptsRoot`  
+`hash2` = `TxRoot`  
+`hash3` = `StateRoot`
 
 ### `tendermint` / `cosmos` based chains
 
-For `tendermint` and `cosmos` based WRKChains, WRKOracle supports the following 7 optional
-hashes:
+For `tendermint` and `cosmos` based WRKChains, WRKOracle supports the following 8 optional
+[block header hashes](https://github.com/tendermint/tendermint/blob/master/types/block.go#L323) to be submitted:
 
 1. `Block.Header.DataHash` - MerkleRoot of transaction hashes in this block
 2. `Block.Header.AppHash` - state after txs from the previous block
@@ -248,6 +248,7 @@ hashes:
 5. `Block.Header.LastCommitHash` - commit from validators from the last block
 6. `Block.Header.ConsensusHash` - consensus params for current block
 7. `Block.Header.NextValidatorsHash` - validators for the next block
+8. `Block.Header.EvidenceHash` - evidence included in the block
 
 By default during initialisation, WRKOracle maps the following hashes:
 

@@ -15,13 +15,13 @@ import (
 
 // TmBlockHeaderResult holds the result from a Tendermint node RPC query
 type TmBlockHeaderResult struct {
-	Result TmResult  `json:"result"`
+	Result TmResult `json:"result"`
 }
 
 // TmResult holds the minimum amount of data returned from a Tendermint node RPC request
 type TmResult struct {
 	BlockID TmBlockID `json:"block_id"`
-	Block  TmBlock    `json:"block"`
+	Block   TmBlock   `json:"block"`
 }
 
 // TmBlockID holds the minimum amount of block ID data returned from a Tendermint node RPC request
@@ -31,17 +31,17 @@ type TmBlockID struct {
 
 // TmBlock holds the minimum amount of block ID data returned from a Tendermint node RPC request
 type TmBlock struct {
-    Header TmBlockHeader `json:"header"`
+	Header TmBlockHeader `json:"header"`
 }
 
 // TmBlockHeader holds the minimum Tendermint block header info returned from a TM RPC query
 // required to process a geth based WRKChain block header
 type TmBlockHeader struct {
 	// prev block info
-    LastBlockId TmBlockID `json:"last_block_id"`
+	LastBlockId TmBlockID `json:"last_block_id"`
 
-	Height string `json:"height"`
-    ChainId string `json:"chain_id"`
+	Height  string `json:"height"`
+	ChainId string `json:"chain_id"`
 
 	// hashes of block data
 	LastCommitHash string `json:"last_commit_hash"` // commit from validators from the last block
@@ -55,7 +55,7 @@ type TmBlockHeader struct {
 	// root hash of all results from the txs from the previous block
 	LastResultsHash string `json:"last_results_hash"`
 	// consensus info
-	EvidenceHash    string `json:"evidence_hash"`    // evidence included in the block
+	EvidenceHash string `json:"evidence_hash"` // evidence included in the block
 }
 
 // Tendermint is a structure for holding a Tendermint based WRKChain client

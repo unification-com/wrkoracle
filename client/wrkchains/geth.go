@@ -16,15 +16,15 @@ import (
 
 // GethBlockHeaderResult holds the result from a Geth JSON RPC query
 type GethBlockHeaderResult struct {
-    Id string `json:"id"`
-	Jsonrpc string `json:"jsonrpc"`
-    Result GethBlockHeader  `json:"result"`
+	Id      string          `json:"id"`
+	Jsonrpc string          `json:"jsonrpc"`
+	Result  GethBlockHeader `json:"result"`
 }
 
 // GethBlockHeader holds the minimum Geth block header info returned from a Geth JSON RPC query
 // required to process a geth based WRKChain block header
 type GethBlockHeader struct {
-    Number       string `json:"number"`
+	Number       string `json:"number"`
 	Hash         string `json:"hash"`
 	ParentHash   string `json:"parentHash"`
 	MixHash      string `json:"mixHash"`

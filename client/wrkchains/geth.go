@@ -1,17 +1,38 @@
 package wrkchains
 
 import (
-	"context"
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"math/big"
+	"io/ioutil"
+	"net/http"
+	"strconv"
 	"strings"
 
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/unification-com/wrkoracle/types"
 )
+
+// GethBlockHeaderResult holds the result from a Geth JSON RPC query
+type GethBlockHeaderResult struct {
+    Id string `json:"id"`
+	Jsonrpc string `json:"jsonrpc"`
+    Result GethBlockHeader  `json:"result"`
+}
+
+// GethBlockHeader holds the minimum Geth block header info returned from a Geth JSON RPC query
+// required to process a geth based WRKChain block header
+type GethBlockHeader struct {
+    Number       string `json:"number"`
+	Hash         string `json:"hash"`
+	ParentHash   string `json:"parentHash"`
+	MixHash      string `json:"mixHash"`
+	UncleHash    string `json:"sha3Uncles"`
+	TxRoot       string `json:"transactionsRoot"`
+	StateRoot    string `json:"stateRoot"`
+	ReceiptsRoot string `json:"receiptsRoot"`
+}
 
 // Geth is a structure for holding a Geth based WRKChain client
 type Geth struct {
@@ -22,7 +43,7 @@ type Geth struct {
 // NewGethClient returns a new Geth struct
 func NewGethClient() *Geth {
 	return &Geth{
-		supportedHashMaps: []string{"ReceiptHash", "TxHash", "Root", "UncleHash", "MixDigest"},
+		supportedHashMaps: []string{"ReceiptsRoot", "TxRoot", "StateRoot", "UncleHash", "MixHash"},
 	}
 }
 
@@ -34,32 +55,49 @@ func (g *Geth) SetLogger(log log.Logger) {
 // GetBlockAtHeight is used to get the block headers for a given height from a geth based WRKChain
 func (g Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 
-	wrkChainClient, err := ethclient.Dial(viper.GetString(types.FlagWrkchainRpc))
+	queryUrl := viper.GetString(types.FlagWrkchainRpc)
+
+	atHeight := "latest"
+
+	if height > 0 {
+		atHeight = "0x" + strconv.FormatUint(height, 16)
+	}
+
+	var jsonStr = []byte(`{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["` + atHeight + `",false]}`)
+
+	resp, err := http.Post(queryUrl, "application/json", bytes.NewBuffer(jsonStr))
 	if err != nil {
-		return  WrkChainBlockHeader{}, err
+		return WrkChainBlockHeader{}, err
 	}
-
-	atHeight := big.NewInt(0).SetUint64(height)
-
-	if height == 0 {
-		atHeight = nil
-	}
-
-	latestWrkchainHeader, err := wrkChainClient.HeaderByNumber(context.Background(), atHeight)
-
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return WrkChainBlockHeader{}, err
 	}
 
-	blockHash := latestWrkchainHeader.Hash().String()
+	var res GethBlockHeaderResult
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		return WrkChainBlockHeader{}, nil
+	}
+
+	header := res.Result
+	cleanedHeight := strings.Replace(header.Number, "0x", "", -1)
+	blockNumber, err := strconv.ParseUint(cleanedHeight, 16, 64)
+
+	if err != nil {
+		return WrkChainBlockHeader{}, nil
+	}
+
+	blockHash := header.Hash
 	parentHash := ""
 	hash1 := ""
 	hash2 := ""
 	hash3 := ""
-	blockHeight := latestWrkchainHeader.Number.Uint64()
+	blockHeight := blockNumber
 
 	if viper.GetBool(types.FlagParentHash) {
-		parentHash = latestWrkchainHeader.ParentHash.String()
+		parentHash = header.ParentHash
 	}
 
 	hash1Ref := viper.GetString(types.FlagHash1)
@@ -67,20 +105,18 @@ func (g Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	hash3Ref := viper.GetString(types.FlagHash3)
 
 	if len(hash1Ref) > 0 {
-		hash1 = g.getHash(latestWrkchainHeader, hash1Ref)
+		hash1 = g.getHash(header, hash1Ref)
 	}
 
 	if len(hash2Ref) > 0 {
-		hash2 = g.getHash(latestWrkchainHeader, hash2Ref)
+		hash2 = g.getHash(header, hash2Ref)
 	}
 
 	if len(hash3Ref) > 0 {
-		hash3 = g.getHash(latestWrkchainHeader, hash3Ref)
+		hash3 = g.getHash(header, hash3Ref)
 	}
 
 	wrkchainBlock := NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
-
-	wrkChainClient.Close()
 
 	return wrkchainBlock, nil
 }
@@ -99,28 +135,28 @@ func (g Geth) IsSupportedHash(hashType string) (bool, error) {
 func (g Geth) GetDefaultHashMap(hashRef string) string {
 	switch hashRef {
 	case "hash1":
-		return "ReceiptHash"
+		return "ReceiptsRoot"
 	case "hash2":
-		return "TxHash"
+		return "TxRoot"
 	case "hash3":
-		return "Root"
+		return "StateRoot"
 	default:
 		return ""
 	}
 }
 
-func (g Geth) getHash(header *ethtypes.Header, ref string) string {
+func (g Geth) getHash(header GethBlockHeader, ref string) string {
 	switch ref {
-	case "ReceiptHash":
-		return header.ReceiptHash.String()
-	case "TxHash":
-		return header.TxHash.String()
-	case "Root":
-		return header.Root.String()
+	case "ReceiptsRoot":
+		return header.ReceiptsRoot
+	case "TxRoot":
+		return header.TxRoot
+	case "StateRoot":
+		return header.StateRoot
 	case "UncleHash":
-		return header.UncleHash.String()
-	case "MixDigest":
-		return header.MixDigest.String()
+		return header.UncleHash
+	case "MixHash":
+		return header.MixHash
 	default:
 		g.log.Error(fmt.Sprintf("unknown hash type '%s'", ref))
 		return ""

@@ -3,14 +3,24 @@ package wrkchains
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strconv"
-	"strings"
-
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/unification-com/wrkoracle/types"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+)
+
+// nolint
+const (
+	DataHash           string = "DataHash"
+	AppHash            string = "AppHash"
+	ValidatorsHash     string = "ValidatorsHash"
+	LastResultsHash    string = "LastResultsHash"
+	LastCommitHash     string = "LastCommitHash"
+	ConsensusHash      string = "ConsensusHash"
+	NextValidatorsHash string = "NextValidatorsHash"
+	EvidenceHash       string = "EvidenceHash"
 )
 
 // TmBlockHeaderResult holds the result from a Tendermint node RPC query
@@ -58,22 +68,33 @@ type TmBlockHeader struct {
 	EvidenceHash string `json:"evidence_hash"` // evidence included in the block
 }
 
+func init() {
+	wrkchainClientCreator := func(log log.Logger) WrkChainClient {
+		return NewTendermintClient(log)
+	}
+
+	supportedHashMaps := []string{DataHash, AppHash, ValidatorsHash, LastResultsHash, LastCommitHash, ConsensusHash, NextValidatorsHash, EvidenceHash}
+
+	defaultHashMap := make(map[string]string)
+	defaultHashMap[types.FlagHash1] = DataHash
+	defaultHashMap[types.FlagHash2] = AppHash
+	defaultHashMap[types.FlagHash3] = ValidatorsHash
+
+	registerWrkchainModule(TendermintWrkchainType, wrkchainClientCreator, supportedHashMaps, defaultHashMap, false)
+}
+
+var _ WrkChainClient = (*Tendermint)(nil)
+
 // Tendermint is a structure for holding a Tendermint based WRKChain client
 type Tendermint struct {
-	log               log.Logger
-	supportedHashMaps []string
+	log log.Logger
 }
 
 // NewTendermintClient returns a new Tendermint struct
-func NewTendermintClient() *Tendermint {
+func NewTendermintClient(log log.Logger) *Tendermint {
 	return &Tendermint{
-		supportedHashMaps: []string{"DataHash", "AppHash", "ValidatorsHash", "LastResultsHash", "LastCommitHash", "ConsensusHash", "NextValidatorsHash", "EvidenceHash"},
+		log: log,
 	}
-}
-
-// SetLogger sets the logger
-func (t *Tendermint) SetLogger(log log.Logger) {
-	t.log = log
 }
 
 // GetBlockAtHeight is used to get the block headers for a given height from a tendermint based WRKChain
@@ -142,45 +163,21 @@ func (t Tendermint) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error)
 	return wrkchainBlock, nil
 }
 
-// IsSupportedHash checks if the given hashType for the given chainType is currently supported by WRKOracle
-func (t Tendermint) IsSupportedHash(hashType string) (bool, error) {
-	for _, h := range t.supportedHashMaps {
-		if hashType == h {
-			return true, nil
-		}
-	}
-	return false, fmt.Errorf("unsupported hash map '%s' for wrkchain type 'tendermint'. supported types: %s", hashType, strings.Join(t.supportedHashMaps, ", "))
-}
-
-// GetDefaultHashMap returns the default has mapping for a given reference
-func (t Tendermint) GetDefaultHashMap(hashRef string) string {
-	switch hashRef {
-	case "hash1":
-		return "DataHash"
-	case "hash2":
-		return "AppHash"
-	case "hash3":
-		return "ValidatorsHash"
-	default:
-		return ""
-	}
-}
-
 func (t Tendermint) getHash(header TmBlockHeader, ref string) string {
 	switch ref {
-	case "DataHash":
+	case DataHash:
 		return header.DataHash
-	case "AppHash":
+	case AppHash:
 		return header.AppHash
-	case "ValidatorsHash":
+	case ValidatorsHash:
 		return header.ValidatorsHash
-	case "LastResultsHash":
+	case LastResultsHash:
 		return header.LastResultsHash
-	case "LastCommitHash":
+	case LastCommitHash:
 		return header.LastCommitHash
-	case "ConsensusHash":
+	case ConsensusHash:
 		return header.ConsensusHash
-	case "NextValidatorsHash":
+	case NextValidatorsHash:
 		return header.NextValidatorsHash
 	default:
 		t.log.Error(fmt.Sprintf("unknown hash type '%s'", ref))

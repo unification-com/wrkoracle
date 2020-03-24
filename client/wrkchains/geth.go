@@ -14,6 +14,15 @@ import (
 	"github.com/unification-com/wrkoracle/types"
 )
 
+// nolint
+const (
+	ReceiptsRoot string = "ReceiptsRoot"
+	TxRoot       string = "TxRoot"
+	StateRoot    string = "StateRoot"
+	UncleHash    string = "UncleHash"
+	MixHash      string = "MixHash"
+)
+
 // GethBlockHeaderResult holds the result from a Geth JSON RPC query
 type GethBlockHeaderResult struct {
 	Id      string          `json:"id"`
@@ -34,22 +43,33 @@ type GethBlockHeader struct {
 	ReceiptsRoot string `json:"receiptsRoot"`
 }
 
+func init() {
+	wrkchainClientCreator := func(log log.Logger) WrkChainClient {
+		return NewGethClient(log)
+	}
+
+	supportedHashMaps := []string{ReceiptsRoot, TxRoot, StateRoot, UncleHash, MixHash}
+
+	defaultHashMap := make(map[string]string)
+	defaultHashMap[types.FlagHash1] = ReceiptsRoot
+	defaultHashMap[types.FlagHash2] = TxRoot
+	defaultHashMap[types.FlagHash3] = StateRoot
+
+	registerWrkchainModule(GethWrkchainType, wrkchainClientCreator, supportedHashMaps, defaultHashMap, false)
+}
+
+var _ WrkChainClient = (*Geth)(nil)
+
 // Geth is a structure for holding a Geth based WRKChain client
 type Geth struct {
-	log               log.Logger
-	supportedHashMaps []string
+	log log.Logger
 }
 
 // NewGethClient returns a new Geth struct
-func NewGethClient() *Geth {
+func NewGethClient(log log.Logger) *Geth {
 	return &Geth{
-		supportedHashMaps: []string{"ReceiptsRoot", "TxRoot", "StateRoot", "UncleHash", "MixHash"},
+		log: log,
 	}
-}
-
-// SetLogger sets the logger
-func (g *Geth) SetLogger(log log.Logger) {
-	g.log = log
 }
 
 // GetBlockAtHeight is used to get the block headers for a given height from a geth based WRKChain
@@ -121,41 +141,17 @@ func (g Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	return wrkchainBlock, nil
 }
 
-// IsSupportedHash checks if the given hashType for the given chainType is currently supported by WRKOracle
-func (g Geth) IsSupportedHash(hashType string) (bool, error) {
-	for _, h := range g.supportedHashMaps {
-		if hashType == h {
-			return true, nil
-		}
-	}
-	return false, fmt.Errorf("unsupported hash map '%s' for wrkchain type 'geth'. supported types: %s", hashType, strings.Join(g.supportedHashMaps, ", "))
-}
-
-// GetDefaultHashMap returns the default has mapping for a given reference
-func (g Geth) GetDefaultHashMap(hashRef string) string {
-	switch hashRef {
-	case "hash1":
-		return "ReceiptsRoot"
-	case "hash2":
-		return "TxRoot"
-	case "hash3":
-		return "StateRoot"
-	default:
-		return ""
-	}
-}
-
 func (g Geth) getHash(header GethBlockHeader, ref string) string {
 	switch ref {
-	case "ReceiptsRoot":
+	case ReceiptsRoot:
 		return header.ReceiptsRoot
-	case "TxRoot":
+	case TxRoot:
 		return header.TxRoot
-	case "StateRoot":
+	case StateRoot:
 		return header.StateRoot
-	case "UncleHash":
+	case UncleHash:
 		return header.UncleHash
-	case "MixHash":
+	case MixHash:
 		return header.MixHash
 	default:
 		g.log.Error(fmt.Sprintf("unknown hash type '%s'", ref))

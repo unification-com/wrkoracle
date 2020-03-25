@@ -5,6 +5,7 @@ import (
 	"github.com/unification-com/wrkoracle/client/wrkchains"
 	"os"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -63,6 +64,7 @@ func main() {
 			clikeys.Commands(),
 			RunCmd(cdc),
 			RecordSingleCmd(cdc),
+			TypesCmd(),
 		)...,
 	)
 
@@ -71,6 +73,24 @@ func main() {
 	if err != nil {
 		fmt.Printf("Failed executing CLI command: %s, exiting...\n", err)
 		os.Exit(1)
+	}
+}
+
+// TypesCmd is the CLI command to output a list of currently supported WRKChain types
+func TypesCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "types",
+		Short: "output a list of currently supported WRKChain types",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+
+			supportedTypes := wrkchains.GetSupportedWrkchainTypes()
+			sort.Strings(supportedTypes)
+
+			fmt.Println(strings.Join(supportedTypes, "\n"))
+
+			return nil
+		},
 	}
 }
 

@@ -24,6 +24,7 @@ type StellarBlockHeader struct {
 	HeaderXdr string `json:"header_xdr"`
 }
 
+// StellarLatestBlockHeader holds the minimum Stellar block header info returned from a Stellar "latest ledger" JSON RPC query
 type StellarLatestBlockHeader struct {
 	Embedded struct {
 		Records []struct {

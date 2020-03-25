@@ -69,8 +69,8 @@ type TmBlockHeader struct {
 }
 
 func init() {
-	wrkchainClientCreator := func(log log.Logger) WrkChainClient {
-		return NewTendermintClient(log)
+	wrkchainClientCreator := func(log log.Logger, lastHeight uint64) WrkChainClient {
+		return NewTendermintClient(log, lastHeight)
 	}
 
 	supportedHashMaps := []string{DataHash, AppHash, ValidatorsHash, LastResultsHash, LastCommitHash, ConsensusHash, NextValidatorsHash, EvidenceHash}
@@ -87,18 +87,20 @@ var _ WrkChainClient = (*Tendermint)(nil)
 
 // Tendermint is a structure for holding a Tendermint based WRKChain client
 type Tendermint struct {
-	log log.Logger
+	log        log.Logger
+	lastHeight uint64
 }
 
 // NewTendermintClient returns a new Tendermint struct
-func NewTendermintClient(log log.Logger) *Tendermint {
+func NewTendermintClient(log log.Logger, lastHeight uint64) *Tendermint {
 	return &Tendermint{
-		log: log,
+		log:        log,
+		lastHeight: lastHeight,
 	}
 }
 
 // GetBlockAtHeight is used to get the block headers for a given height from a tendermint based WRKChain
-func (t Tendermint) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
+func (t *Tendermint) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 
 	queryUrl := viper.GetString(types.FlagWrkchainRpc) + "/block"
 	if height > 0 {
@@ -121,7 +123,7 @@ func (t Tendermint) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error)
 	err = json.Unmarshal(body, &res)
 
 	if err != nil {
-		return WrkChainBlockHeader{}, nil
+		return WrkChainBlockHeader{}, err
 	}
 
 	tmBlock := res.Result
@@ -133,6 +135,10 @@ func (t Tendermint) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error)
 	hash2 := ""
 	hash3 := ""
 	blockHeight, err := strconv.Atoi(tmBlock.Block.Header.Height)
+
+	if height == 0 {
+		t.lastHeight = uint64(blockHeight)
+	}
 
 	if err != nil {
 		return WrkChainBlockHeader{}, err

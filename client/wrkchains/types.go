@@ -36,6 +36,10 @@ type WrkChainMeta struct {
 	Moniker    string `json:"moniker"`
 	Name       string `json:"name"`
 	Type       string `json:"type"`
+	LastBlock  string `json:"lastblock"`
+	NumBlocks  string `json:"num_blocks"`
+	RegTime    string `json:"reg_time"`
+	Owner      string `json:"owner"`
 }
 
 // WrkChainMetaQueryResponse is a structure which holds Mainchain query data

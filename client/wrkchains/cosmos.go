@@ -6,8 +6,8 @@ import (
 )
 
 func init() {
-	wrkchainClientCreator := func(log log.Logger) WrkChainClient {
-		return NewTendermintClient(log)
+	wrkchainClientCreator := func(log log.Logger, lastHeight uint64) WrkChainClient {
+		return NewTendermintClient(log, lastHeight)
 	}
 
 	supportedHashMaps := []string{DataHash, AppHash, ValidatorsHash, LastResultsHash, LastCommitHash, ConsensusHash, NextValidatorsHash, EvidenceHash}

@@ -44,8 +44,8 @@ type GethBlockHeader struct {
 }
 
 func init() {
-	wrkchainClientCreator := func(log log.Logger) WrkChainClient {
-		return NewGethClient(log)
+	wrkchainClientCreator := func(log log.Logger, lastHeight uint64) WrkChainClient {
+		return NewGethClient(log, lastHeight)
 	}
 
 	supportedHashMaps := []string{ReceiptsRoot, TxRoot, StateRoot, UncleHash, MixHash}
@@ -62,18 +62,20 @@ var _ WrkChainClient = (*Geth)(nil)
 
 // Geth is a structure for holding a Geth based WRKChain client
 type Geth struct {
-	log log.Logger
+	log        log.Logger
+	lastHeight uint64
 }
 
 // NewGethClient returns a new Geth struct
-func NewGethClient(log log.Logger) *Geth {
+func NewGethClient(log log.Logger, lastHeight uint64) *Geth {
 	return &Geth{
-		log: log,
+		log:        log,
+		lastHeight: lastHeight,
 	}
 }
 
 // GetBlockAtHeight is used to get the block headers for a given height from a geth based WRKChain
-func (g Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
+func (g *Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 
 	queryUrl := viper.GetString(types.FlagWrkchainRpc)
 
@@ -98,7 +100,7 @@ func (g Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	var res GethBlockHeaderResult
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return WrkChainBlockHeader{}, nil
+		return WrkChainBlockHeader{}, err
 	}
 
 	header := res.Result
@@ -106,7 +108,7 @@ func (g Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	blockNumber, err := strconv.ParseUint(cleanedHeight, 16, 64)
 
 	if err != nil {
-		return WrkChainBlockHeader{}, nil
+		return WrkChainBlockHeader{}, err
 	}
 
 	blockHash := header.Hash
@@ -115,6 +117,10 @@ func (g Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	hash2 := ""
 	hash3 := ""
 	blockHeight := blockNumber
+
+	if height == 0 {
+		g.lastHeight = blockNumber
+	}
 
 	if viper.GetBool(types.FlagParentHash) {
 		parentHash = header.ParentHash

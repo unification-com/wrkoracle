@@ -148,7 +148,10 @@ func (n *Neo) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	hash2 := ""
 	hash3 := ""
 	blockHeight := header.Index
-	n.lastHeight = blockHeight
+
+	if height == 0 {
+		n.lastHeight = blockHeight
+	}
 
 	if viper.GetBool(types.FlagParentHash) {
 		parentHash = header.PreviousHash

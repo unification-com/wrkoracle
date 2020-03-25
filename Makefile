@@ -10,7 +10,7 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=WrkOracle \
 	-X github.com/cosmos/cosmos-sdk/version.ServerName=wrkoracle \
 	-X github.com/cosmos/cosmos-sdk/version.ClientName=wrkoracle \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
-	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT)"
+	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT)
 
 BUILD_FLAGS := -ldflags '$(ldflags)'
 

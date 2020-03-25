@@ -21,6 +21,7 @@ const (
 	TendermintWrkchainType  WrkchainType = "tendermint"
 	NeoWrkchainType         WrkchainType = "neo"
 	StellarWrkchainType     WrkchainType = "stellar"
+	EosWrkchainType         WrkchainType = "eos"
 )
 
 type wrkchainClientCreator func(log log.Logger, lastHeight uint64) WrkChainClient

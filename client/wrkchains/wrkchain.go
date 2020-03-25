@@ -2,6 +2,7 @@ package wrkchains
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -13,12 +14,14 @@ type WrkchainType string
 
 // Currently supported WRKChain types
 const (
-	GethWrkchainType       WrkchainType = "geth"
-	CosmosWrkchainType     WrkchainType = "cosmos"
-	TendermintWrkchainType WrkchainType = "tendermint"
+	PseudoChainWrkchainType WrkchainType = "pseudochain" //generates random hashes for development only
+	GethWrkchainType        WrkchainType = "geth"
+	CosmosWrkchainType      WrkchainType = "cosmos"
+	TendermintWrkchainType  WrkchainType = "tendermint"
+	NeoWrkchainType         WrkchainType = "neo"
 )
 
-type wrkchainClientCreator func(log log.Logger) WrkChainClient
+type wrkchainClientCreator func(log log.Logger, lastHeight uint64) WrkChainClient
 
 // WrkchainModule is a structure to hold WRKChain module information
 type WrkchainModule struct {
@@ -54,7 +57,11 @@ func NewWrkChain(wrkchainMeta WrkChainMeta, log log.Logger) (*WrkChain, error) {
 		return &WrkChain{}, err
 	}
 
-	wrkChainClient := wrkChainModule.creator(log)
+	lastHeight, err := strconv.Atoi(wrkchainMeta.LastBlock)
+	if err != nil {
+		lastHeight = 0
+	}
+	wrkChainClient := wrkChainModule.creator(log, uint64(lastHeight))
 
 	return &WrkChain{
 		wrkChainClient: wrkChainClient,
@@ -112,12 +119,12 @@ func GetSupportedWrkchainTypes() []string {
 }
 
 // GetLatestBlock is a top level function to query any WRKChain type for the latest block header
-func (w WrkChain) GetLatestBlock() (WrkChainBlockHeader, error) {
+func (w *WrkChain) GetLatestBlock() (WrkChainBlockHeader, error) {
 	return w.GetWrkChainBlock(0)
 }
 
 // GetWrkChainBlock is a top level function to query any WRKChain type for the block header at a given height
-func (w WrkChain) GetWrkChainBlock(height uint64) (WrkChainBlockHeader, error) {
+func (w *WrkChain) GetWrkChainBlock(height uint64) (WrkChainBlockHeader, error) {
 
 	w.log.Info("Get block for WRKChain", "moniker", w.wrkchainMeta.Moniker, "type", w.wrkchainMeta.Type, "rpc", viper.GetString(types.FlagWrkchainRpc))
 

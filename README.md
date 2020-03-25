@@ -285,6 +285,22 @@ By default during initialisation, WRKOracle maps the following hashes:
 `hash2` =   
 `hash3` =   
 
+### `eos` based chains
+
+**Note:** WRKOracle for EOS will retrieve the latest irreversible block, not the current highest block.
+
+For `eos` based WRKChains, WRKOracle supports the following optional 3 additional data:
+
+1. `TxMRoot` (`transaction_mroot`)
+2. `ActionRoot` (`action_mroot`)
+3. `ProducerSig` (`schedule_version`)
+
+By default during initialisation, WRKOracle maps the following hashes:
+
+`hash1` = `TxMRoot`  
+`hash2` = `ActionRoot`  
+`hash3` = `ProducerSig`  
+
 ### `pseudochain`
 
 `pseudochain` is a fake chain for development purposes - it will generate random hashes for each block

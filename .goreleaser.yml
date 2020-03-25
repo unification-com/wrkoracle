@@ -28,6 +28,7 @@ builds:
 
 archives:
   -
+    name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format: tar.gz
     format_overrides:
       - goos: windows
@@ -41,7 +42,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-SNAPSHOT-{{.ShortCommit}}"
+  name_template: "v{{ .Tag }}-SNAPSHOT-{{.ShortCommit}}"
 changelog:
   sort: asc
   filters:

@@ -22,6 +22,7 @@ const (
 	ScriptVerification string = "ScriptVerification"
 )
 
+// NeoGetBestBlockResult holds the result for a Neo getbestblockhash JSON RPC query
 type NeoGetBestBlockResult struct {
 	Id      int    `json:"id"`
 	Jsonrpc string `json:"jsonrpc"`
@@ -162,15 +163,15 @@ func (n *Neo) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	hash3Ref := viper.GetString(types.FlagHash3)
 
 	if len(hash1Ref) > 0 {
-		hash1 = n.Neoash(header, hash1Ref)
+		hash1 = n.gethash(header, hash1Ref)
 	}
 
 	if len(hash2Ref) > 0 {
-		hash2 = n.Neoash(header, hash2Ref)
+		hash2 = n.gethash(header, hash2Ref)
 	}
 
 	if len(hash3Ref) > 0 {
-		hash3 = n.Neoash(header, hash3Ref)
+		hash3 = n.gethash(header, hash3Ref)
 	}
 
 	wrkchainBlock := NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
@@ -178,7 +179,7 @@ func (n *Neo) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	return wrkchainBlock, nil
 }
 
-func (n Neo) Neoash(header NeoBlockHeader, ref string) string {
+func (n Neo) gethash(header NeoBlockHeader, ref string) string {
 	switch ref {
 	case MerkleRoot:
 		return header.MerkleRoot

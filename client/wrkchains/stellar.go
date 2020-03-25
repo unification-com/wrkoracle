@@ -18,9 +18,9 @@ const (
 // StellarBlockHeader holds the minimum Stellar block header info returned from a Stellar JSON RPC query
 // required to process a Stellar based WRKChain block header
 type StellarBlockHeader struct {
-	Hash string `json:"hash"`
-	PrevHash string `json:"prev_hash"`
-	Sequence uint64 `json:"sequence"`
+	Hash      string `json:"hash"`
+	PrevHash  string `json:"prev_hash"`
+	Sequence  uint64 `json:"sequence"`
 	HeaderXdr string `json:"header_xdr"`
 }
 

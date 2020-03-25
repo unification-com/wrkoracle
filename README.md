@@ -255,3 +255,24 @@ By default during initialisation, WRKOracle maps the following hashes:
 `hash1` = `DataHash`  
 `hash2` = `AppHash`  
 `hash3` = `ValidatorsHash`
+
+### `neo` based chains
+
+For `neo` based WRKChains, WRKOracle supports the following 6 optional additional data:
+
+1. `MerkleRoot`
+2. `NextConsensus`
+3. `NextBlockHash`
+4. `Nonce`
+5. `Script.Invocation`
+6. `Script.Verification`
+
+By default during initialisation, WRKOracle maps the following hashes:
+
+`hash1` = `MerkleRoot`  
+`hash2` = `NextConsensus`  
+`hash3` = `ScriptVerification`
+
+### `pseudochain`
+
+`pseudochain` is a fake chain for development purposes - it will generate random hashes for each block

@@ -19,7 +19,7 @@ const (
 	ProducerSig string = "ProducerSig"
 )
 
-// EosGetBestBlockResult holds the result for a Eos getbestblockhash JSON RPC query
+// EosGetBlockInfoResult holds the result for a Eos getbestblockhash JSON RPC query
 type EosGetBlockInfoResult struct {
 	ChainId          string `json:"chain_id"`
 	LastIrreversible uint64 `json:"last_irreversible_block_num"`

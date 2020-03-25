@@ -273,6 +273,18 @@ By default during initialisation, WRKOracle maps the following hashes:
 `hash2` = `NextConsensus`  
 `hash3` = `ScriptVerification`
 
+### `stellar` based chains
+
+For `stellar` based WRKChains, WRKOracle supports the following optional additional data:
+
+1. `HeaderXdr`
+
+By default during initialisation, WRKOracle maps the following hashes:
+
+`hash1` = `HeaderXdr`  
+`hash2` =   
+`hash3` =   
+
 ### `pseudochain`
 
 `pseudochain` is a fake chain for development purposes - it will generate random hashes for each block

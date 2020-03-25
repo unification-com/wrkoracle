@@ -10,6 +10,7 @@ import (
 	"github.com/unification-com/wrkoracle/types"
 )
 
+// WrkchainType is a string alias to hold supported WRKChain types
 type WrkchainType string
 
 // Currently supported WRKChain types

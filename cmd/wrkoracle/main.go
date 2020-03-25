@@ -118,7 +118,7 @@ func RunCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			if !wrkchains.IsSupportedWrkchainType(wrkchainType) {
-				supportedTypes := strings.Join(wrkchains.SupportedWrkchainTypes, ", ")
+				supportedTypes := strings.Join(wrkchains.GetSupportedWrkchainTypes(), ", ")
 				return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", wrkchainType, supportedTypes)
 			}
 
@@ -188,7 +188,7 @@ func RecordSingleCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			if !wrkchains.IsSupportedWrkchainType(wrkchainType) {
-				supportedTypes := strings.Join(wrkchains.SupportedWrkchainTypes, ", ")
+				supportedTypes := strings.Join(wrkchains.GetSupportedWrkchainTypes(), ", ")
 				return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", wrkchainType, supportedTypes)
 			}
 

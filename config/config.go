@@ -132,7 +132,7 @@ func setConfValue(tree *toml.Tree, key, value string) error {
 
 	case "wrkchain-type":
 		if !wrkchains.IsSupportedWrkchainType(value) {
-			supportedTypes := strings.Join(wrkchains.SupportedWrkchainTypes, ", ")
+			supportedTypes := strings.Join(wrkchains.GetSupportedWrkchainTypes(), ", ")
 			return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", value, supportedTypes)
 		}
 		tree.Set(key, value)
@@ -140,13 +140,14 @@ func setConfValue(tree *toml.Tree, key, value string) error {
 	case "hash1", "hash2", "hash3":
 		currentType := tree.Get("wrkchain-type").(string)
 		if !wrkchains.IsSupportedWrkchainType(currentType) {
-			supportedTypes := strings.Join(wrkchains.SupportedWrkchainTypes, ", ")
+			supportedTypes := strings.Join(wrkchains.GetSupportedWrkchainTypes(), ", ")
 			return fmt.Errorf("unsupported WRKChain type detected in config: %s. supported types: %s", currentType, supportedTypes)
 		}
 		isSupported, err := wrkchains.IsSupportedHash(currentType, value)
 		if !isSupported || err != nil {
 			return err
 		}
+
 		tree.Set(key, value)
 
 	case "trace", "trust-node", "indent", "parent-hash":
@@ -160,6 +161,7 @@ func setConfValue(tree *toml.Tree, key, value string) error {
 	default:
 		return errUnknownConfigKey(key)
 	}
+	fmt.Printf("updated config:  %s = %s\n", key, value)
 	return nil
 }
 
@@ -219,7 +221,7 @@ func runInitConfigCmd(cmd *cobra.Command, args []string) error {
 	wrkchainType := args[0]
 
 	if !wrkchains.IsSupportedWrkchainType(wrkchainType) {
-		supportedTypes := strings.Join(wrkchains.SupportedWrkchainTypes, ", ")
+		supportedTypes := strings.Join(wrkchains.GetSupportedWrkchainTypes(), ", ")
 		return fmt.Errorf("unsupported WRKChain type: %s. supported types: %s", wrkchainType, supportedTypes)
 	}
 
@@ -244,13 +246,13 @@ func runInitConfigCmd(cmd *cobra.Command, args []string) error {
 			}
 
 			tree.Set(k, boolVal)
-
 		default:
 			tree.Set(k, v)
 		}
 	}
 
 	tree.Set(types.FlagWrkchainType, wrkchainType)
+
 	err = initChainType(wrkchainType, tree)
 	if err != nil {
 		return err
@@ -260,6 +262,8 @@ func runInitConfigCmd(cmd *cobra.Command, args []string) error {
 	if err := saveConfigFile(cfgFile, tree); err != nil {
 		return err
 	}
+
+	fmt.Println(tree.String())
 
 	fmt.Fprintf(os.Stderr, "configuration saved to %s\n", cfgFile)
 

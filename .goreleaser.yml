@@ -1,8 +1,12 @@
 # This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
+env:
+  - GO111MODULE=on
+
 before:
   hooks:
     # You may remove this if you don't use go modules.
+    - go mod download
     - go mod verify
 builds:
   -
@@ -20,7 +24,7 @@ builds:
       - -X github.com/cosmos/cosmos-sdk/version.ServerName=wrkoracle
       - -X github.com/cosmos/cosmos-sdk/version.ClientName=wrkoracle
       - -X github.com/cosmos/cosmos-sdk/version.Version={{.Version}}
-      - -X github.com/cosmos/cosmos-sdk/version.Commit=
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{.FullCommit}}
 
 archives:
   -
@@ -37,7 +41,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: "{{ .Tag }}-SNAPSHOT-{{.ShortCommit}}"
 changelog:
   sort: asc
   filters:

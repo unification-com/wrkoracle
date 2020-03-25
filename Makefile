@@ -36,3 +36,9 @@ test:
 
 clean:
 	rm -rf build/
+
+snapshot:
+	goreleaser --snapshot --skip-publish --rm-dist
+
+release:
+	goreleaser --rm-dist

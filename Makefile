@@ -4,6 +4,8 @@ VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
 COMMIT := $(shell git log -1 --format='%H')
 BINDIR ?= $(GOPATH)/bin
 
+GORELEASER = $(BINDIR)/goreleaser
+
 export GO111MODULE = on
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=WrkOracle \
@@ -37,8 +39,13 @@ test:
 clean:
 	rm -rf build/
 
-snapshot:
+snapshot: goreleaser
 	goreleaser --snapshot --skip-publish --rm-dist
 
-release:
+release: goreleaser
 	goreleaser --rm-dist
+
+goreleaser: $(GORELEASER)
+$(GORELEASER):
+	@echo "Installing goreleaser..."
+	@(cd /tmp && go get github.com/goreleaser/goreleaser)

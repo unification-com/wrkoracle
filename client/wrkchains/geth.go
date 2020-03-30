@@ -25,7 +25,7 @@ const (
 
 // GethBlockHeaderResult holds the result from a Geth JSON RPC query
 type GethBlockHeaderResult struct {
-	Id      string          `json:"id"`
+	Id      uint64          `json:"id"`
 	Jsonrpc string          `json:"jsonrpc"`
 	Result  GethBlockHeader `json:"result"`
 }
@@ -45,14 +45,14 @@ type GethBlockHeader struct {
 
 func init() {
 	wrkchainClientCreator := func(log log.Logger, lastHeight uint64) WrkChainClient {
-		return NewGethClient(log, lastHeight)
+		return NewGethClient(log, lastHeight, GethWrkchainType)
 	}
 
 	supportedHashMaps := []string{ReceiptsRoot, TxRoot, StateRoot, UncleHash, MixHash}
 
 	defaultHashMap := make(map[string]string)
-	defaultHashMap[types.FlagHash1] = ReceiptsRoot
-	defaultHashMap[types.FlagHash2] = TxRoot
+	defaultHashMap[types.FlagHash1] = TxRoot
+	defaultHashMap[types.FlagHash2] = ReceiptsRoot
 	defaultHashMap[types.FlagHash3] = StateRoot
 
 	registerWrkchainModule(GethWrkchainType, wrkchainClientCreator, supportedHashMaps, defaultHashMap, false)
@@ -62,16 +62,23 @@ var _ WrkChainClient = (*Geth)(nil)
 
 // Geth is a structure for holding a Geth based WRKChain client
 type Geth struct {
-	log        log.Logger
-	lastHeight uint64
+	log          log.Logger
+	lastHeight   uint64
+	wrkchainType WrkchainType
 }
 
 // NewGethClient returns a new Geth struct
-func NewGethClient(log log.Logger, lastHeight uint64) *Geth {
+func NewGethClient(log log.Logger, lastHeight uint64, wrkchainType WrkchainType) *Geth {
 	return &Geth{
-		log:        log,
-		lastHeight: lastHeight,
+		log:          log,
+		lastHeight:   lastHeight,
+		wrkchainType: wrkchainType,
 	}
+}
+
+// GetWrkChainType returns the WRKChain type
+func (g Geth) GetWrkChainType() WrkchainType {
+	return g.wrkchainType
 }
 
 // GetBlockAtHeight is used to get the block headers for a given height from a geth based WRKChain
@@ -85,7 +92,7 @@ func (g *Geth) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 		atHeight = "0x" + strconv.FormatUint(height, 16)
 	}
 
-	var jsonStr = []byte(`{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["` + atHeight + `",false]}`)
+	var jsonStr = []byte(`{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["` + atHeight + `",false],"id":1}`)
 
 	resp, err := http.Post(queryUrl, "application/json", bytes.NewBuffer(jsonStr))
 	if err != nil {

@@ -54,7 +54,7 @@ type NeoBlockHeader struct {
 
 func init() {
 	wrkchainClientCreator := func(log log.Logger, lastHeight uint64) WrkChainClient {
-		return NewNeoClient(log, lastHeight)
+		return NewNeoClient(log, lastHeight, NeoWrkchainType)
 	}
 
 	supportedHashMaps := []string{MerkleRoot, NextConsensus, NextBlockHash, Nonce, ScriptInvocation, ScriptVerification}
@@ -71,16 +71,23 @@ var _ WrkChainClient = (*Neo)(nil)
 
 // Neo is a structure for holding a Neo based WRKChain client
 type Neo struct {
-	log        log.Logger
-	lastHeight uint64
+	log          log.Logger
+	lastHeight   uint64
+	wrkchainType WrkchainType
 }
 
 // NewNeoClient returns a new Neo struct
-func NewNeoClient(log log.Logger, lastHeight uint64) *Neo {
+func NewNeoClient(log log.Logger, lastHeight uint64, wrkchainType WrkchainType) *Neo {
 	return &Neo{
-		log:        log,
-		lastHeight: lastHeight,
+		log:          log,
+		lastHeight:   lastHeight,
+		wrkchainType: wrkchainType,
 	}
+}
+
+// GetWrkChainType returns the WRKChain type
+func (n Neo) GetWrkChainType() WrkchainType {
+	return n.wrkchainType
 }
 
 func (n Neo) getLatestBlockHash() (string, error) {

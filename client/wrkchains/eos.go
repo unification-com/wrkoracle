@@ -38,7 +38,7 @@ type EosBlockHeaderResult struct {
 
 func init() {
 	wrkchainClientCreator := func(log log.Logger, lastHeight uint64) WrkChainClient {
-		return NewEosClient(log, lastHeight)
+		return NewEosClient(log, lastHeight, EosWrkchainType)
 	}
 
 	supportedHashMaps := []string{TxMRoot, ActionRoot, ProducerSig}
@@ -55,19 +55,26 @@ var _ WrkChainClient = (*Eos)(nil)
 
 // Eos is a structure for holding a Eos based WRKChain client
 type Eos struct {
-	log        log.Logger
-	lastHeight uint64
+	log          log.Logger
+	lastHeight   uint64
+	wrkchainType WrkchainType
 }
 
 // NewEosClient returns a new Eos struct
-func NewEosClient(log log.Logger, lastHeight uint64) *Eos {
+func NewEosClient(log log.Logger, lastHeight uint64, wrkchainType WrkchainType) *Eos {
 	return &Eos{
-		log:        log,
-		lastHeight: lastHeight,
+		log:          log,
+		lastHeight:   lastHeight,
+		wrkchainType: wrkchainType,
 	}
 }
 
-func (n Eos) getLatestBlockHash() (string, error) {
+// GetWrkChainType returns the WRKChain type
+func (e Eos) GetWrkChainType() WrkchainType {
+	return e.wrkchainType
+}
+
+func (e Eos) getLatestBlockHash() (string, error) {
 	queryUrl := viper.GetString(types.FlagWrkchainRpc) + "/v1/chain/get_info"
 	resp, err := http.Post(queryUrl, "application/json", bytes.NewBuffer([]byte{}))
 	if err != nil {
@@ -87,12 +94,12 @@ func (n Eos) getLatestBlockHash() (string, error) {
 }
 
 // GetBlockAtHeight is used to get the block headers for a given height from a Eos based WRKChain
-func (n *Eos) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
+func (e *Eos) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 
 	queryUrl := viper.GetString(types.FlagWrkchainRpc) + "/v1/chain/get_block"
 
 	var jsonStr []byte
-	atHeight, err := n.getLatestBlockHash()
+	atHeight, err := e.getLatestBlockHash()
 	if err != nil {
 		return WrkChainBlockHeader{}, err
 	}
@@ -135,7 +142,7 @@ func (n *Eos) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	}
 
 	if height == 0 {
-		n.lastHeight = blockHeight
+		e.lastHeight = blockHeight
 	}
 
 	if viper.GetBool(types.FlagParentHash) {
@@ -147,15 +154,15 @@ func (n *Eos) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	hash3Ref := viper.GetString(types.FlagHash3)
 
 	if len(hash1Ref) > 0 {
-		hash1 = n.gethash(header, hash1Ref)
+		hash1 = e.gethash(header, hash1Ref)
 	}
 
 	if len(hash2Ref) > 0 {
-		hash2 = n.gethash(header, hash2Ref)
+		hash2 = e.gethash(header, hash2Ref)
 	}
 
 	if len(hash3Ref) > 0 {
-		hash3 = n.gethash(header, hash3Ref)
+		hash3 = e.gethash(header, hash3Ref)
 	}
 
 	wrkchainBlock := NewWrkChainBlockHeader(blockHeight, blockHash, parentHash, hash1, hash2, hash3)
@@ -163,7 +170,7 @@ func (n *Eos) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 	return wrkchainBlock, nil
 }
 
-func (n Eos) gethash(header EosBlockHeaderResult, ref string) string {
+func (e Eos) gethash(header EosBlockHeaderResult, ref string) string {
 	switch ref {
 	case TxMRoot:
 		return header.TxMRoot
@@ -172,7 +179,7 @@ func (n Eos) gethash(header EosBlockHeaderResult, ref string) string {
 	case ProducerSig:
 		return header.ProducerSig
 	default:
-		n.log.Error(fmt.Sprintf("unknown hash type '%s'", ref))
+		e.log.Error(fmt.Sprintf("unknown hash type '%s'", ref))
 		return ""
 	}
 }

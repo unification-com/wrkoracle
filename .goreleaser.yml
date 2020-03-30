@@ -5,8 +5,6 @@ env:
 
 before:
   hooks:
-    # You may remove this if you don't use go modules.
-    - go mod download
     - go mod verify
 builds:
   -
@@ -25,6 +23,10 @@ builds:
       - -X github.com/cosmos/cosmos-sdk/version.ClientName=wrkoracle
       - -X github.com/cosmos/cosmos-sdk/version.Version={{.Version}}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{.FullCommit}}
+    flags:
+      - -mod=readonly
+    hooks:
+      pre: go mod verify
 
 archives:
   -
@@ -42,10 +44,11 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "v{{ .Tag }}-SNAPSHOT-{{.ShortCommit}}"
+  name_template: "{{ .Tag }}-SNAPSHOT-{{.ShortCommit}}"
 changelog:
   sort: asc
   filters:
     exclude:
     - '^docs:'
     - '^test:'
+    - '^dist:'

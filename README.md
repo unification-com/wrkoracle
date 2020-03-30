@@ -232,8 +232,8 @@ to be submitted:
 
 By default during initialisation, WRKOracle maps them as follows:
 
-`hash1` = `ReceiptsRoot`  
-`hash2` = `TxRoot`  
+`hash1` = `TxRoot`  
+`hash2` = `ReceiptsRoot`  
 `hash3` = `StateRoot`
 
 ### `tendermint` / `cosmos` based chains

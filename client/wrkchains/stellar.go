@@ -35,7 +35,7 @@ type StellarLatestBlockHeader struct {
 
 func init() {
 	wrkchainClientCreator := func(log log.Logger, lastHeight uint64) WrkChainClient {
-		return NewStellarClient(log, lastHeight)
+		return NewStellarClient(log, lastHeight, StellarWrkchainType)
 	}
 
 	supportedHashMaps := []string{HeaderXdr}
@@ -52,20 +52,27 @@ var _ WrkChainClient = (*Stellar)(nil)
 
 // Stellar is a structure for holding a Stellar based WRKChain client
 type Stellar struct {
-	log        log.Logger
-	lastHeight uint64
+	log          log.Logger
+	lastHeight   uint64
+	wrkchainType WrkchainType
 }
 
 // NewStellarClient returns a new Stellar struct
-func NewStellarClient(log log.Logger, lastHeight uint64) *Stellar {
+func NewStellarClient(log log.Logger, lastHeight uint64, wrkchainType WrkchainType) *Stellar {
 	return &Stellar{
-		log:        log,
-		lastHeight: lastHeight,
+		log:          log,
+		lastHeight:   lastHeight,
+		wrkchainType: wrkchainType,
 	}
 }
 
+// GetWrkChainType returns the WRKChain type
+func (s Stellar) GetWrkChainType() WrkchainType {
+	return s.wrkchainType
+}
+
 // GetBlockAtHeight is used to get the block headers for a given height from a Stellar based WRKChain
-func (n *Stellar) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
+func (s *Stellar) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 
 	queryUrl := viper.GetString(types.FlagWrkchainRpc) + "/ledgers"
 
@@ -110,7 +117,7 @@ func (n *Stellar) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 		if len(hash1Ref) > 0 {
 			hash1 = res.Embedded.Records[0].HeaderXdr
 		}
-		n.lastHeight = blockHeight
+		s.lastHeight = blockHeight
 	} else {
 		var res StellarBlockHeader
 		err = json.Unmarshal(body, &res)

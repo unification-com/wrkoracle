@@ -70,7 +70,7 @@ type TmBlockHeader struct {
 
 func init() {
 	wrkchainClientCreator := func(log log.Logger, lastHeight uint64) WrkChainClient {
-		return NewTendermintClient(log, lastHeight)
+		return NewTendermintClient(log, lastHeight, TendermintWrkchainType)
 	}
 
 	supportedHashMaps := []string{DataHash, AppHash, ValidatorsHash, LastResultsHash, LastCommitHash, ConsensusHash, NextValidatorsHash, EvidenceHash}
@@ -87,16 +87,23 @@ var _ WrkChainClient = (*Tendermint)(nil)
 
 // Tendermint is a structure for holding a Tendermint based WRKChain client
 type Tendermint struct {
-	log        log.Logger
-	lastHeight uint64
+	log          log.Logger
+	lastHeight   uint64
+	wrkchainType WrkchainType
 }
 
 // NewTendermintClient returns a new Tendermint struct
-func NewTendermintClient(log log.Logger, lastHeight uint64) *Tendermint {
+func NewTendermintClient(log log.Logger, lastHeight uint64, wrkchainType WrkchainType) *Tendermint {
 	return &Tendermint{
-		log:        log,
-		lastHeight: lastHeight,
+		log:          log,
+		lastHeight:   lastHeight,
+		wrkchainType: wrkchainType,
 	}
+}
+
+// GetWrkChainType returns the WRKChain type
+func (t Tendermint) GetWrkChainType() WrkchainType {
+	return t.wrkchainType
 }
 
 // GetBlockAtHeight is used to get the block headers for a given height from a tendermint based WRKChain

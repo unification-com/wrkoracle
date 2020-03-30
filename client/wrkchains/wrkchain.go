@@ -35,7 +35,7 @@ type WrkchainModule struct {
 
 // WrkChain is a top level struct to hold WRKChain data
 type WrkChain struct {
-	wrkChainClient WrkChainClient
+	WrkChainClient WrkChainClient
 	wrkchainMeta   WrkChainMeta
 	log            log.Logger
 }
@@ -67,7 +67,7 @@ func NewWrkChain(wrkchainMeta WrkChainMeta, log log.Logger) (*WrkChain, error) {
 	wrkChainClient := wrkChainModule.creator(log, uint64(lastHeight))
 
 	return &WrkChain{
-		wrkChainClient: wrkChainClient,
+		WrkChainClient: wrkChainClient,
 		wrkchainMeta:   wrkchainMeta,
 		log:            log.With("pkg", "wrkchains"),
 	}, nil
@@ -131,7 +131,7 @@ func (w *WrkChain) GetWrkChainBlock(height uint64) (WrkChainBlockHeader, error) 
 
 	w.log.Info("Get block for WRKChain", "moniker", w.wrkchainMeta.Moniker, "type", w.wrkchainMeta.Type, "rpc", viper.GetString(types.FlagWrkchainRpc))
 
-	wrkchainBlock, err := w.wrkChainClient.GetBlockAtHeight(height)
+	wrkchainBlock, err := w.WrkChainClient.GetBlockAtHeight(height)
 
 	if err != nil {
 		return WrkChainBlockHeader{}, err

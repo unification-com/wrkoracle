@@ -63,7 +63,7 @@ or by importing a key from an existing Mnemonic:
 wrkoracle keys add my_wrkoracle_acc --recover
 ```
 
-In either case, the account will need sufficient UND to run the Oracle and submit hashes to
+In either case, the account will need sufficient FUND to run the Oracle and submit hashes to
 Mainchain.
 
 WRKOracle must then be initialised with default values by running:

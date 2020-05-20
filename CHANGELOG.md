@@ -4,6 +4,10 @@
 
 Unreleased changes have been merged into `master`
 
+## v0.3.3 - 20/05/2020
+
+* [[`cbbf4d2d82`](https://github.com/unification-com/wrkoracle/commit/cbbf4d2d82)] - Merge pull request #29 from unification-com/und\_to\_fund ([Indika](https://github.com/Indika))
+* [[`59ca707e75`](https://github.com/unification-com/wrkoracle/commit/59ca707e75)] - add changelog ([Codegnosis](https://github.com/Codegnosis))
 * [[`622c551266`](https://github.com/unification-com/wrkoracle/commit/622c551266)] - readme - UND -\> FUND ([Codegnosis](https://github.com/Codegnosis))
 * [[`b0c94e9b26`](https://github.com/unification-com/wrkoracle/commit/b0c94e9b26)] - Merge pull request #28 from unification-com/issue\_templates ([Indika](https://github.com/Indika))
 * [[`539b54a7ad`](https://github.com/unification-com/wrkoracle/commit/539b54a7ad)] - add issue templates ([Codegnosis](https://github.com/Codegnosis))

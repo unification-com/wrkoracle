@@ -18,8 +18,6 @@ const (
 	NextConsensus      string = "NextConsensus"
 	NextBlockHash      string = "NextBlockHash"
 	Nonce              string = "Nonce"
-	ScriptInvocation   string = "ScriptInvocation"
-	ScriptVerification string = "ScriptVerification"
 )
 
 // NeoGetBestBlockResult holds the result for a Neo getbestblockhash JSON RPC query
@@ -57,12 +55,12 @@ func init() {
 		return NewNeoClient(log, lastHeight, NeoWrkchainType)
 	}
 
-	supportedHashMaps := []string{MerkleRoot, NextConsensus, NextBlockHash, Nonce, ScriptInvocation, ScriptVerification}
+	supportedHashMaps := []string{MerkleRoot, NextConsensus, NextBlockHash, Nonce}
 
 	defaultHashMap := make(map[string]string)
 	defaultHashMap[types.FlagHash1] = MerkleRoot
 	defaultHashMap[types.FlagHash2] = NextConsensus
-	defaultHashMap[types.FlagHash3] = ScriptVerification
+	defaultHashMap[types.FlagHash3] = Nonce
 
 	registerWrkchainModule(NeoWrkchainType, wrkchainClientCreator, supportedHashMaps, defaultHashMap, false)
 }
@@ -196,10 +194,6 @@ func (n Neo) gethash(header NeoBlockHeader, ref string) string {
 		return header.NextBlockHash
 	case Nonce:
 		return header.Nonce
-	case ScriptInvocation:
-		return header.Script.Invocation
-	case ScriptVerification:
-		return header.Script.Verification
 	default:
 		n.log.Error(fmt.Sprintf("unknown hash type '%s'", ref))
 		return ""

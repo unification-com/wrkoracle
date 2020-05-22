@@ -4,6 +4,11 @@
 
 Unreleased changes have been merged into `master`
 
+## v0.3.4 - 22/05/2020
+
+* [[`57baa29a69`](https://github.com/unification-com/wrkoracle/commit/57baa29a69)] - modify native hash support according to und v1.4.6 update ([Codegnosis](https://github.com/Codegnosis))
+* [[`1b9895a76e`](https://github.com/unification-com/wrkoracle/commit/1b9895a76e)] - Merge pull request #30 from unification-com/r\_0.3.3\_changelog ([Indika](https://github.com/Indika))
+
 ## v0.3.3 - 20/05/2020
 
 * [[`cbbf4d2d82`](https://github.com/unification-com/wrkoracle/commit/cbbf4d2d82)] - Merge pull request #29 from unification-com/und\_to\_fund ([Indika](https://github.com/Indika))

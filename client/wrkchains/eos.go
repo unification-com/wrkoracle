@@ -16,7 +16,6 @@ import (
 const (
 	TxMRoot     string = "TxMRoot"
 	ActionRoot  string = "ActionRoot"
-	ProducerSig string = "ProducerSig"
 )
 
 // EosGetBlockInfoResult holds the result for a Eos getbestblockhash JSON RPC query
@@ -41,12 +40,12 @@ func init() {
 		return NewEosClient(log, lastHeight, EosWrkchainType)
 	}
 
-	supportedHashMaps := []string{TxMRoot, ActionRoot, ProducerSig}
+	supportedHashMaps := []string{TxMRoot, ActionRoot}
 
 	defaultHashMap := make(map[string]string)
 	defaultHashMap[types.FlagHash1] = TxMRoot
 	defaultHashMap[types.FlagHash2] = ActionRoot
-	defaultHashMap[types.FlagHash3] = ProducerSig
+	defaultHashMap[types.FlagHash3] = ""
 
 	registerWrkchainModule(EosWrkchainType, wrkchainClientCreator, supportedHashMaps, defaultHashMap, false)
 }
@@ -176,8 +175,6 @@ func (e Eos) gethash(header EosBlockHeaderResult, ref string) string {
 		return header.TxMRoot
 	case ActionRoot:
 		return header.ActionRoot
-	case ProducerSig:
-		return header.ProducerSig
 	default:
 		e.log.Error(fmt.Sprintf("unknown hash type '%s'", ref))
 		return ""

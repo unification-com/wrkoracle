@@ -258,30 +258,26 @@ By default during initialisation, WRKOracle maps the following hashes:
 
 ### `neo` based chains
 
-For `neo` based WRKChains, WRKOracle supports the following 6 optional additional data:
+For `neo` based WRKChains, WRKOracle supports the following 4 optional additional hashes and data:
 
 1. `MerkleRoot`
 2. `NextConsensus`
 3. `NextBlockHash`
 4. `Nonce`
-5. `Script.Invocation`
-6. `Script.Verification`
 
 By default during initialisation, WRKOracle maps the following hashes:
 
 `hash1` = `MerkleRoot`  
 `hash2` = `NextConsensus`  
-`hash3` = `ScriptVerification`
+`hash3` = `Nonce`
 
 ### `stellar` based chains
 
-For `stellar` based WRKChains, WRKOracle supports the following optional additional data:
-
-1. `HeaderXdr`
+No additional hash data is natively supported.
 
 By default during initialisation, WRKOracle maps the following hashes:
 
-`hash1` = `HeaderXdr`  
+`hash1` =   
 `hash2` =   
 `hash3` =   
 
@@ -289,17 +285,16 @@ By default during initialisation, WRKOracle maps the following hashes:
 
 **Note:** WRKOracle for EOS will retrieve the latest irreversible block, not the current highest block.
 
-For `eos` based WRKChains, WRKOracle supports the following optional 3 additional data:
+For `eos` based WRKChains, WRKOracle supports the following optional 2 additional data:
 
 1. `TxMRoot` (`transaction_mroot`)
 2. `ActionRoot` (`action_mroot`)
-3. `ProducerSig` (`schedule_version`)
 
 By default during initialisation, WRKOracle maps the following hashes:
 
 `hash1` = `TxMRoot`  
 `hash2` = `ActionRoot`  
-`hash3` = `ProducerSig`  
+`hash3` =   
 
 ### `pseudochain`
 

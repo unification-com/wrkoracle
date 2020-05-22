@@ -10,11 +10,6 @@ import (
 	"strconv"
 )
 
-// nolint
-const (
-	HeaderXdr string = "HeaderXdr"
-)
-
 // StellarBlockHeader holds the minimum Stellar block header info returned from a Stellar JSON RPC query
 // required to process a Stellar based WRKChain block header
 type StellarBlockHeader struct {
@@ -38,10 +33,10 @@ func init() {
 		return NewStellarClient(log, lastHeight, StellarWrkchainType)
 	}
 
-	supportedHashMaps := []string{HeaderXdr}
+	supportedHashMaps := []string{}
 
 	defaultHashMap := make(map[string]string)
-	defaultHashMap[types.FlagHash1] = HeaderXdr
+	defaultHashMap[types.FlagHash1] = ""
 	defaultHashMap[types.FlagHash2] = ""
 	defaultHashMap[types.FlagHash3] = ""
 
@@ -113,9 +108,6 @@ func (s *Stellar) GetBlockAtHeight(height uint64) (WrkChainBlockHeader, error) {
 		blockHeight = res.Embedded.Records[0].Sequence
 		if viper.GetBool(types.FlagParentHash) {
 			parentHash = res.Embedded.Records[0].PrevHash
-		}
-		if len(hash1Ref) > 0 {
-			hash1 = res.Embedded.Records[0].HeaderXdr
 		}
 		s.lastHeight = blockHeight
 	} else {
